@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StorySphere - Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>.glassmorphism { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }</style>
+    <style>
+        .glassmorphism { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+        input[type="file"] { color: #d1d5db; }
+        input[type="file"]::file-selector-button { font-weight: bold; color: #111827; background-color: #f9a8d4; padding: 0.5rem 1rem; border: none; border-radius: 0.25rem; cursor: pointer; margin-right: 1rem; }
+        button:disabled { background-color: #4b5563; cursor: not-allowed; }
+    </style>
 </head>
 <body class="bg-gray-900 text-white">
     <div class="container mx-auto p-6">
@@ -18,9 +23,9 @@
                 <div><label for="genre" class="block mb-1">Genre</label><input type="text" id="genre" class="w-full p-2 rounded-lg text-black" required></div>
                 <div><label for="pages" class="block mb-1">Pages</label><input type="text" id="pages" class="w-full p-2 rounded-lg text-black" required></div>
                 <div><label for="description" class="block mb-1">Description</label><textarea id="description" class="w-full p-2 rounded-lg text-black" rows="3" required></textarea></div>
-                <div><label for="image" class="block mb-1">Image URL</label><input type="url" id="image" class="w-full p-2 rounded-lg text-black" required></div>
-                <div><label for="pdf" class="block mb-1">PDF URL (Optional)</label><input type="url" id="pdf" class="w-full p-2 rounded-lg text-black"></div>
-                <button type="submit" class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors w-full">Add Book to Database</button>
+                <div><label for="imageUpload" class="block mb-1">Upload Image</label><input type="file" id="imageUpload" class="w-full p-2 rounded-lg" accept="image/*" required></div>
+                <div><label for="pdfUpload" class="block mb-1">Upload PDF (Optional)</label><input type="file" id="pdfUpload" class="w-full p-2 rounded-lg" accept=".pdf"></div>
+                <button type="submit" id="submitBtn" class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors w-full">Add Book to Database</button>
             </form>
         </div>
 
@@ -38,18 +43,80 @@
         // --- SUPABASE SETUP ---
         const SUPABASE_URL = 'https://zovzpiolbqezdjghhrgt.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdnpwaW9sYnFlemRqZ2hocmd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0Nzc0NzMsImV4cCI6MjA3MTA1MzQ3M30.t_dvIsnbwUFsgB1Bs1gcyo_Mic-z3i0g6pqMeQIoiXI';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { createClient } = window.supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- UI ELEMENTS ---
+        const form = document.getElementById('bookForm');
+        const submitBtn = document.getElementById('submitBtn');
 
         // --- FUNCTIONS ---
+        async function getBooks() { /* ... unchanged ... */ }
+        function renderTable(books) { /* ... unchanged ... */ }
+        async function deleteBook(id) { /* ... unchanged ... */ }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+
+            const imageFile = document.getElementById('imageUpload').files[0];
+            const pdfFile = document.getElementById('pdfUpload').files[0];
+            let imageUrl = null;
+            let pdfUrl = null;
+
+            try {
+                // 1. Upload Image to Supabase Storage
+                if (imageFile) {
+                    const imagePath = `public/${Date.now()}_${imageFile.name}`;
+                    const { data: imageData, error: imageError } = await supabase.storage.from('book_files').upload(imagePath, imageFile);
+                    if (imageError) throw imageError;
+                    
+                    const { data: publicImageData } = supabase.storage.from('book_files').getPublicUrl(imagePath);
+                    imageUrl = publicImageData.publicUrl;
+                }
+
+                // 2. Upload PDF to Supabase Storage
+                if (pdfFile) {
+                    const pdfPath = `public/${Date.now()}_${pdfFile.name}`;
+                    const { data: pdfData, error: pdfError } = await supabase.storage.from('book_files').upload(pdfPath, pdfFile);
+                    if (pdfError) throw pdfError;
+
+                    const { data: publicPdfData } = supabase.storage.from('book_files').getPublicUrl(pdfPath);
+                    pdfUrl = publicPdfData.publicUrl;
+                }
+
+                // 3. Insert Book record into the database
+                const newBook = {
+                    title: form.title.value,
+                    genre: form.genre.value,
+                    pages: form.pages.value,
+                    description: form.description.value,
+                    image: imageUrl, // Use the public URL from storage
+                    pdf: pdfUrl      // Use the public URL from storage
+                };
+
+                const { error: insertError } = await supabase.from('books').insert([newBook]);
+                if (insertError) throw insertError;
+
+                alert('Success! Book has been added to the database.');
+                form.reset();
+                getBooks();
+
+            } catch (error) {
+                console.error('Error during book creation:', error);
+                alert(`Error: ${error.message}`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Book to Database';
+            }
+        });
+
+        // --- Helper functions for rendering and deleting (no changes needed) ---
         async function getBooks() {
             const { data, error } = await supabase.from('books').select('*');
-            if (error) {
-                console.error('Error fetching books:', error);
-            } else {
-                renderTable(data);
-            }
+            if (error) { console.error('Error fetching books:', error); } else { renderTable(data); }
         }
-        
         function renderTable(books) {
             const tbody = document.getElementById('bookTableBody');
             tbody.innerHTML = '';
@@ -60,43 +127,12 @@
                 tbody.appendChild(row);
             });
         }
-
-        document.getElementById('bookForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const newBook = {
-                title: form.title.value,
-                genre: form.genre.value,
-                pages: form.pages.value,
-                description: form.description.value,
-                image: form.image.value,
-                pdf: form.pdf.value || null
-            };
-
-            const { error } = await supabase.from('books').insert([newBook]);
-            if (error) {
-                console.error('Error adding book:', error);
-                alert('Error adding book: ' + error.message);
-            } else {
-                alert('Success! Book has been added to the database.');
-                form.reset();
-                getBooks();
-            }
-        });
-
         async function deleteBook(id) {
             if (!confirm('Are you sure you want to delete this book?')) return;
-            
             const { error } = await supabase.from('books').delete().eq('id', id);
-            if (error) {
-                console.error('Error deleting book:', error);
-                alert('Error deleting book: ' + error.message);
-            } else {
-                alert('Book deleted successfully!');
-                getBooks();
-            }
+            if (error) { alert('Error deleting book: ' + error.message); } else { alert('Book deleted successfully!'); getBooks(); }
         }
-
+        
         // --- INITIALIZATION ---
         getBooks();
     </script>
