@@ -14,7 +14,6 @@
             <h2 class="text-2xl font-semibold mb-4">Add New Book</h2>
             <form id="bookForm" class="space-y-4">
                 <div><label for="title" class="block mb-1">Title</label><input type="text" id="title" class="w-full p-2 rounded-lg text-black" required></div>
-                <!-- *** NEW AUTHOR FIELD ADDED HERE *** -->
                 <div><label for="author" class="block mb-1">Author / Writer</label><input type="text" id="author" class="w-full p-2 rounded-lg text-black" required></div>
                 <div><label for="genre" class="block mb-1">Genre</label><input type="text" id="genre" class="w-full p-2 rounded-lg text-black" required></div>
                 <div><label for="pages" class="block mb-1">Pages</label><input type="text" id="pages" class="w-full p-2 rounded-lg text-black" required></div>
@@ -22,13 +21,15 @@
                 <div><label for="story_text" class="block mb-1">Story Text (Paste the full story here)</label><textarea id="story_text" class="w-full p-2 rounded-lg text-black" rows="6"></textarea></div>
                 <div><label for="imageUpload" class="block mb-1">Upload Image</label><input type="file" id="imageUpload" class="w-full p-2 rounded-lg" accept="image/*" required></div>
                 <div><label for="pdfUpload" class="block mb-1">Upload PDF (Optional)</label><input type="file" id="pdfUpload" class="w-full p-2 rounded-lg" accept=".pdf"></div>
+                <!-- *** NAYA CHECKBOX ADD KIYA GAYA HAI *** -->
+                <div class="flex items-center"><input type="checkbox" id="is_private" class="h-4 w-4 rounded mr-2"><label for="is_private">Make this a Private Novel (18+)</label></div>
                 <button type="submit" id="submitBtn" class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors w-full">Add Book to Database</button>
             </form>
         </div>
         <div class="glassmorphism p-6 rounded-xl">
             <h2 class="text-2xl font-semibold mb-4">Current Book List</h2>
             <table id="bookTable" class="w-full text-left">
-                <thead><tr class="border-b border-gray-600"><th class="p-2">Title</th><th class="p-2">Author</th><th class="p-2">Actions</th></tr></thead>
+                <thead><tr class="border-b border-gray-600"><th class="p-2">Title</th><th class="p-2">Author</th><th class="p-2">Status</th><th class="p-2">Actions</th></tr></thead>
                 <tbody id="bookTableBody"></tbody>
             </table>
         </div>
@@ -44,68 +45,55 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Uploading...';
-            const imageFile = document.getElementById('imageUpload').files[0];
-            const pdfFile = document.getElementById('pdfUpload').files[0];
-            let imageUrl = null, pdfUrl = null;
+            submitBtn.disabled = true; submitBtn.textContent = 'Uploading...';
             try {
+                const imageFile = document.getElementById('imageUpload').files[0];
+                const pdfFile = document.getElementById('pdfUpload').files[0];
+                let imageUrl = null, pdfUrl = null;
                 if (imageFile) {
                     const imagePath = `public/${Date.now()}_${imageFile.name}`;
-                    const { error: imageError } = await supabase.storage.from('book_files').upload(imagePath, imageFile);
-                    if (imageError) throw imageError;
+                    await supabase.storage.from('book_files').upload(imagePath, imageFile);
                     imageUrl = supabase.storage.from('book_files').getPublicUrl(imagePath).data.publicUrl;
                 }
                 if (pdfFile) {
                     const pdfPath = `public/${Date.now()}_${pdfFile.name}`;
-                    const { error: pdfError } = await supabase.storage.from('book_files').upload(pdfPath, pdfFile);
-                    if (pdfError) throw pdfError;
+                    await supabase.storage.from('book_files').upload(pdfPath, pdfFile);
                     pdfUrl = supabase.storage.from('book_files').getPublicUrl(pdfPath).data.publicUrl;
                 }
                 const newBook = {
                     title: form.title.value,
-                    author: form.author.value, // <-- ADDED AUTHOR
+                    author: form.author.value,
                     genre: form.genre.value,
                     pages: form.pages.value,
                     description: form.description.value,
                     story_text: form.story_text.value,
                     image: imageUrl,
-                    pdf: pdfUrl
+                    pdf: pdfUrl,
+                    is_private: form.is_private.checked // <-- CHECKBOX KI VALUE SAVE HOGI
                 };
-                const { error: insertError } = await supabase.from('books').insert([newBook]);
-                if (insertError) throw insertError;
-                alert('Success! Book has been added.');
+                await supabase.from('books').insert([newBook]);
+                alert('Success! Book added.');
                 form.reset();
                 getBooks();
             } catch (error) {
-                console.error('Error:', error);
                 alert(`Error: ${error.message}`);
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Add Book to Database';
+                submitBtn.disabled = false; submitBtn.textContent = 'Add Book to Database';
             }
         });
-
         function renderTable(books) {
             const tbody = document.getElementById('bookTableBody');
             tbody.innerHTML = '';
             books.forEach(book => {
                 const row = document.createElement('tr');
                 row.className = 'border-b border-gray-700';
-                // <-- ADDED AUTHOR TO TABLE DISPLAY -->
-                row.innerHTML = `<td class="p-2">${book.title}</td><td class="p-2">${book.author}</td><td class="p-2"><button class="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 text-sm" onclick="deleteBook(${book.id})">Delete</button></td>`;
+                const status = book.is_private ? '<span class="text-red-400">Private</span>' : '<span class="text-green-400">Public</span>';
+                row.innerHTML = `<td class="p-2">${book.title}</td><td class="p-2">${book.author}</td><td class="p-2">${status}</td><td class="p-2"><button class="bg-red-500 text-white px-2 py-1 rounded-lg" onclick="deleteBook(${book.id})">Delete</button></td>`;
                 tbody.appendChild(row);
             });
         }
-        async function getBooks() {
-            const { data, error } = await supabase.from('books').select('*');
-            if (error) { console.error('Error fetching books:', error); } else { renderTable(data); }
-        }
-        async function deleteBook(id) {
-            if (!confirm('Are you sure?')) return;
-            const { error } = await supabase.from('books').delete().eq('id', id);
-            if (error) { alert('Error: ' + error.message); } else { alert('Book deleted!'); getBooks(); }
-        }
+        async function getBooks(){const{data,error}=await supabase.from("books").select("*");if(error){console.error(error)}else{renderTable(data)}}
+        async function deleteBook(id){if(confirm("Are you sure?")){const{error}=await supabase.from("books").delete().eq("id",id);if(error){alert(error.message)}else{alert("Book deleted!");getBooks()}}}
         getBooks();
     </script>
 </body>
