@@ -64,32 +64,9 @@
         document.getElementById('continue-btn').addEventListener('click', () => { offerPopup.style.display = 'none'; showBookDetails(selectedBookId); });
         document.getElementById('close-modal').addEventListener('click', () => { bookModal.style.display = 'none'; });
 
-        async function getBooks() {
-            const { data, error } = await supabase.from('books').select('*');
-            if (error) { console.error('Error fetching books:', error); bookListContainer.innerHTML = `<p class="text-red-400 text-center col-span-full">Error loading stories. Please check Supabase connection.</p>`; } else { books = data; renderBookCards(); }
-        }
-
-        function renderBookCards() {
-            bookListContainer.innerHTML = '';
-            if (books.length === 0) { bookListContainer.innerHTML = `<p class="text-gray-300 text-center col-span-full">No stories found. Add some from the admin panel!</p>`; return; }
-            books.forEach(bookData => {
-                const card = document.createElement('div');
-                card.className = 'glassmorphism p-6 rounded-xl hover-scale book-card';
-                card.setAttribute('data-book-id', bookData.id);
-                card.innerHTML = `<h3 class="text-xl font-semibold mb-2">${bookData.title}</h3><p class="text-gray-300 mb-4">${bookData.genre} | ${bookData.pages}</p><button class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors w-full">View Details</button>`;
-                bookListContainer.appendChild(card);
-            });
-            addCardEventListeners();
-        }
-        
-        function addCardEventListeners() {
-            document.querySelectorAll('.book-card').forEach(card => {
-                card.querySelector('button').addEventListener('click', () => {
-                    selectedBookId = parseInt(card.getAttribute('data-book-id'));
-                    offerPopup.style.display = 'block';
-                });
-            });
-        }
+        async function getBooks() { /* ... unchanged ... */ }
+        function renderBookCards() { /* ... unchanged ... */ }
+        function addCardEventListeners() { /* ... unchanged ... */ }
 
         function showBookDetails(bookId) {
             const bookData = books.find(b => b.id === bookId);
@@ -103,26 +80,57 @@
             const readBtn = document.getElementById('read-btn');
             const downloadBtn = document.getElementById('download-btn');
             
-            if (bookData.pdf) {
-                // --- THIS IS THE CRITICAL CHANGE ---
-                // Instead of linking directly to the PDF, we link to our new reader page
-                // and pass the PDF URL and title as parameters.
-                const readerUrl = `reader.html?pdf=${encodeURIComponent(bookData.pdf)}&title=${encodeURIComponent(bookData.title)}`;
+            // --- THIS IS THE CRITICAL CHANGE ---
+            // We now check if there is story_text to read.
+            if (bookData.story_text) {
+                // Link to the new reader page and pass the book's ID
+                const readerUrl = `reader.html?id=${bookData.id}`;
                 readBtn.href = readerUrl;
-                readBtn.removeAttribute('target'); // Remove target blank to open in the same tab
-
-                downloadBtn.href = bookData.pdf;
+                readBtn.removeAttribute('target');
                 readBtn.style.display = 'inline-block';
-                downloadBtn.style.display = 'inline-block';
             } else {
                 readBtn.style.display = 'none';
+            }
+            
+            // The download button still links to the PDF if it exists
+            if (bookData.pdf) {
+                downloadBtn.href = bookData.pdf;
+                downloadBtn.style.display = 'inline-block';
+            } else {
                 downloadBtn.style.display = 'none';
             }
+            
             bookModal.style.display = 'block';
         }
 
+        // --- Unchanged Helper and Initialization Functions ---
+        async function getBooks() {
+            const { data, error } = await supabase.from('books').select('*');
+            if (error) { console.error('Error fetching books:', error); bookListContainer.innerHTML = `<p class="text-red-400 text-center col-span-full">Error loading stories. Please check Supabase connection.</p>`; } else { books = data; renderBookCards(); }
+        }
+        function renderBookCards() {
+            bookListContainer.innerHTML = '';
+            if (books.length === 0) { bookListContainer.innerHTML = `<p class="text-gray-300 text-center col-span-full">No stories found. Add some from the admin panel!</p>`; return; }
+            books.forEach(bookData => {
+                const card = document.createElement('div');
+                card.className = 'glassmorphism p-6 rounded-xl hover-scale book-card';
+                card.setAttribute('data-book-id', bookData.id);
+                card.innerHTML = `<h3 class="text-xl font-semibold mb-2">${bookData.title}</h3><p class="text-gray-300 mb-4">${bookData.genre} | ${bookData.pages}</p><button class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors w-full">View Details</button>`;
+                bookListContainer.appendChild(card);
+            });
+            addCardEventListeners();
+        }
+        function addCardEventListeners() {
+            document.querySelectorAll('.book-card').forEach(card => {
+                card.querySelector('button').addEventListener('click', () => {
+                    selectedBookId = parseInt(card.getAttribute('data-book-id'));
+                    offerPopup.style.display = 'block';
+                });
+            });
+        }
         getBooks();
 
+        // --- Unchanged 3D Scene ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true });
