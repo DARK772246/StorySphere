@@ -8,28 +8,42 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        .pen { width: 12px; height: 50px; background: #FFD700; position: absolute; transform-origin: bottom; animation: write 3s ease-out forwards; margin-top: -50px; margin-left: -80px; }
-        .text-reveal { opacity: 0; animation: fade 3s ease-out forwards; }
-        @keyframes write { 0% { transform: translateX(-80px) rotate(30deg); } 100% { transform: translateX(80px) rotate(30deg); } }
-        @keyframes fade { 0% { opacity: 0; } 50% { opacity: 0; } 100% { opacity: 1; } }
-        #enter-btn { transition: all 0.3s; }
-        #enter-btn:hover { background-color: #92400e; }
-        html { scroll-behavior: smooth; } body { overflow-x: hidden; }
+        html { scroll-behavior: smooth; } 
+        body { overflow-x: hidden; }
         #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1f2937; display: flex; justify-content: center; align-items: center; z-index: 100; color: #fff; flex-direction: column; opacity: 1; transition: opacity 1s ease-out; }
-        #splash-screen.hidden { opacity: 0; pointer-events: none; }
         .glassmorphism { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
         .hover-scale { transition: transform 0.3s ease; } .hover-scale:hover { transform: scale(1.05); }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; overflow-y: auto; }
-        .modal-content { max-width: 800px; margin: 2rem auto; } .social-icon { transition: transform 0.3s ease; } .social-icon:hover { transform: scale(1.2); }
+        .modal-content { max-width: 800px; margin: 2rem auto; } 
+        .social-icon { transition: transform 0.3s ease; } .social-icon:hover { transform: scale(1.2); }
         #age-gate-popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99; justify-content: center; align-items: center; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white">
-    <div id="splash-screen"><div class="text-center"><h1 class="text-4xl font-serif text-reveal">Storysphere</h1><div class="pen"></div><button id="enter-btn" class="mt-8 px-4 py-2 bg-amber-700 rounded text-lg font-semibold">Explore Stories</button><p class="mt-4 text-sm opacity-70">By Salman Khan Orakzai</p></div></div>
     <div id="canvas-container"></div>
     <div class="relative z-10 min-h-screen flex flex-col">
-        <header class="glassmorphism p-4 flex justify-between items-center"><h1 class="text-3xl font-bold tracking-tight">StorySphere</h1><nav class="space-x-6"><a href="#browse" class="text-lg hover:text-pink-300">Browse</a><a href="#private-browse" id="private-link" class="text-lg hover:text-pink-300">Private Novels</a><a href="#about" class="text-lg hover:text-pink-300">About</a></nav></header>
+        <!-- *** HEADER UPDATED WITH HAMBURGER MENU *** -->
+        <header class="glassmorphism p-4 flex justify-between items-center relative">
+            <h1 class="text-3xl font-bold tracking-tight">StorySphere</h1>
+            <!-- Desktop Menu -->
+            <nav class="hidden md:flex space-x-6">
+                <a href="#browse" class="text-lg hover:text-pink-300">Browse</a>
+                <a href="#private-browse" id="private-link-desktop" class="text-lg hover:text-pink-300">Private Novels</a>
+                <a href="#about" class="text-lg hover:text-pink-300">About</a>
+            </nav>
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-white focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden absolute top-full right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg">
+                <a href="#browse" class="block px-4 py-2 text-sm text-white hover:bg-gray-700">Browse</a>
+                <a href="#private-browse" id="private-link-mobile" class="block px-4 py-2 text-sm text-white hover:bg-gray-700">Private Novels</a>
+                <a href="#about" class="block px-4 py-2 text-sm text-white hover:bg-gray-700">About</a>
+            </div>
+        </header>
         
         <main class="flex-grow flex flex-col items-center justify-center py-12 px-4">
             <div class="text-center max-w-2xl"><h2 class="text-4xl md:text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">Dive into Stories with 3D Magic</h2><p class="text-lg md:text-xl text-gray-200 mb-8">Experience novels and stories like never before.</p></div>
@@ -51,20 +65,26 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdnpwaW9sYnFlemRqZ2hocmd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0Nzc0NzMsImV4cCI6MjA3MTA1MzQ3M30.t_dvIsnbwUFsgB1Bs1gcyo_Mic-z3i0g6pqMeQIoiXI';
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const splashScreen = document.getElementById('splash-screen');
+        
         const bookModal = document.getElementById('book-modal');
         const offerPopup = document.getElementById('offer-popup');
         const ageGatePopup = document.getElementById('age-gate-popup');
         const privateBrowseSection = document.getElementById('private-browse');
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
         let books = []; let selectedBookId = null;
 
-        document.getElementById('enter-btn').addEventListener('click', () => { splashScreen.classList.add('hidden'); });
-        document.getElementById('private-link').addEventListener('click', (e) => { e.preventDefault(); if (localStorage.getItem('ageConfirmed') === 'true') { privateBrowseSection.style.display = 'block'; window.location.hash = '#private-browse'; } else { ageGatePopup.style.display = 'flex'; } });
+        // --- EVENT LISTENERS ---
+        menuBtn.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
+        const handlePrivateLinkClick = (e) => { e.preventDefault(); if (localStorage.getItem('ageConfirmed') === 'true') { privateBrowseSection.style.display = 'block'; window.location.hash = '#private-browse'; } else { ageGatePopup.style.display = 'flex'; } mobileMenu.classList.add('hidden'); };
+        document.getElementById('private-link-desktop').addEventListener('click', handlePrivateLinkClick);
+        document.getElementById('private-link-mobile').addEventListener('click', handlePrivateLinkClick);
         document.getElementById('confirmAgeBtn').addEventListener('click', () => { localStorage.setItem('ageConfirmed', 'true'); ageGatePopup.style.display = 'none'; privateBrowseSection.style.display = 'block'; window.location.hash = '#private-browse'; });
         document.getElementById('denyAgeBtn').addEventListener('click', () => { ageGatePopup.style.display = 'none'; });
         document.getElementById('continue-btn').addEventListener('click', () => { offerPopup.style.display = 'none'; showBookDetails(selectedBookId); });
         document.getElementById('close-modal').addEventListener('click', () => { bookModal.style.display = 'none'; });
 
+        // --- CORE FUNCTIONS ---
         async function getBooks() {
             const { data, error } = await supabase.from('books').select('*');
             if (error) { console.error(error); } else { books = data; renderBookCards(); }
@@ -83,16 +103,15 @@
             const card = document.createElement('div');
             card.className = 'glassmorphism p-6 rounded-xl hover-scale book-card';
             card.setAttribute('data-book-id', bookData.id);
-            card.innerHTML = `<h3 class="text-xl font-semibold mb-2">${bookData.title}</h3><p class="text-gray-300 mb-4">${bookData.author}</p><button class="bg-pink-500 text-white px-4 py-2 rounded-lg w-full">View Details</button>`;
+            card.innerHTML = `<h3 class="text-xl font-semibold mb-2">${bookData.title}</h3><p class="text-gray-300 mb-4">${bookData.author || ''}</p><button class="bg-pink-500 text-white px-4 py-2 rounded-lg w-full">View Details</button>`;
             container.appendChild(card);
         }
         function addCardEventListeners(){document.querySelectorAll(".book-card").forEach(t=>{t.querySelector("button").addEventListener("click",()=>{selectedBookId=parseInt(t.getAttribute("data-book-id")),offerPopup.style.display="block"})})}
-        
         function showBookDetails(bookId) {
             const bookData = books.find(b => b.id === bookId);
             if (!bookData) return;
             document.getElementById('book-title').textContent = bookData.title;
-            document.getElementById('book-author').textContent = `By ${bookData.author}`;
+            document.getElementById('book-author').textContent = `By ${bookData.author || 'Unknown Author'}`;
             document.getElementById('book-genre').textContent = `Genre: ${bookData.genre}`;
             document.getElementById('book-pages').textContent = `Length: ${bookData.pages}`;
             document.getElementById('book-description').textContent = bookData.description;
@@ -100,16 +119,13 @@
             const readBtn = document.getElementById('read-btn');
             const downloadBtn = document.getElementById('download-btn');
             const shareBtn = document.getElementById('share-btn');
-            
             if (bookData.story_text) { readBtn.href = `reader.html?id=${bookData.id}`; readBtn.removeAttribute('target'); readBtn.style.display = 'inline-block'; } else { readBtn.style.display = 'none'; }
             if (bookData.pdf) { downloadBtn.href = bookData.pdf; downloadBtn.style.display = 'inline-block'; } else { downloadBtn.style.display = 'none'; }
             shareBtn.onclick = async () => { try { await navigator.share({ title: bookData.title, text: `Check out "${bookData.title}" on StorySphere!`, url: window.location.href }); } catch (err) { alert('Sharing failed.'); } };
             bookModal.style.display = 'block';
         }
-
         getBooks();
         const scene=new THREE.Scene,camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,.1,1e3),renderer=new THREE.WebGLRenderer({alpha:!0});renderer.setSize(window.innerWidth,window.innerHeight),document.getElementById("canvas-container").appendChild(renderer.domElement);const bookGeometry=new THREE.BoxGeometry(2,3,.3),bookTexture=(new THREE.TextureLoader).load("https://images.unsplash.com/photo-1544716278-ca5e3f4ebf0c?auto=format&fit=crop&w=200"),bookMaterial=new THREE.MeshStandardMaterial({map:bookTexture,roughness:.4,metalness:.2}),book=new THREE.Mesh(bookGeometry,bookMaterial);scene.add(book);const ambientLight=new THREE.AmbientLight(16777215,.6);scene.add(ambientLight);const directionalLight=new THREE.DirectionalLight(16777215,.8);directionalLight.position.set(5,5,5),scene.add(directionalLight),camera.position.z=5;function animate(){requestAnimationFrame(animate),book.rotation.y+=.005,book.position.y=Math.sin(.001*Date.now())*.2,renderer.render(scene,camera)}animate(),window.addEventListener("resize",()=>{camera.aspect=window.innerWidth/window.innerHeight,camera.updateProjectionMatrix(),renderer.setSize(window.innerWidth,window.innerHeight)});
     </script>
 </body>
 </html>
-```4.  File save karke bahar aa jayein.
