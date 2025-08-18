@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF--8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StorySphere - 3D Novel Reader</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -53,7 +53,8 @@
         <section id="about" class="py-12 px-4">
             <div class="max-w-4xl mx-auto glassmorphism p-8 rounded-xl">
                 <h2 class="text-3xl font-bold text-center mb-4">About StorySphere</h2>
-                <p class="text-center text-gray-200">StorySphere is a magical place where stories come to life. We believe in the power of imagination and offer an immersive reading experience that blends technology with the timeless art of storytelling. Dive in and explore new worlds!</p>
+                <p class="text-center text-gray-200 mb-4">StorySphere is a magical place where stories come to life. We believe in the power of imagination and offer an immersive reading experience that blends technology with the timeless art of storytelling. Dive in and explore new worlds!</p>
+                <p class="text-center text-gray-400 text-sm">This website is developed by Salman Khan Orakzai.</p>
             </div>
         </section>
 
@@ -72,9 +73,9 @@
                             <button id="close-modal" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">Close</button>
                         </div>
                          <div class="flex justify-center space-x-6 mt-4">
-                            <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-tiktok"></i></a>
-                            <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-instagram"></i></a>
-                            <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-whatsapp"></i></a>
+                            <a href="https://www.tiktok.com/@hba013?_t=ZS-8yy2XEeMu7l&_r=1" target="_blank" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-tiktok"></i></a>
+                            <a href="https://www.instagram.com/salman_orakxi?igsh=dWlxc2oxZnlyd3Bo" target="_blank" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-instagram"></i></a>
+                            <a href="https://wa.me/03275176283" target="_blank" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-whatsapp"></i></a>
                         </div>
                     </div>
                 </div>
@@ -83,9 +84,9 @@
 
         <footer class="glassmorphism p-6 text-center text-gray-300">
             <div class="flex justify-center space-x-6 mb-4">
-                <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-tiktok"></i></a>
-                <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://www.tiktok.com/@hba013?_t=ZS-8yy2XEeMu7l&_r=1" target="_blank" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-tiktok"></i></a>
+                <a href="https://www.instagram.com/salman_orakxi?igsh=dWlxc2oxZnlyd3Bo" target="_blank" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-instagram"></i></a>
+                <a href="https://wa.me/03275176283" target="_blank" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-whatsapp"></i></a>
             </div>
             <p>&copy; 2025 StorySphere. All rights reserved.</p>
         </footer>
@@ -100,7 +101,7 @@
             splashScreen.classList.add('hidden');
         }, 3000);
 
-        // Three.js setup (same as before)
+        // Three.js setup
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -117,36 +118,19 @@
         directionalLight.position.set(5, 5, 5);
         scene.add(directionalLight);
         camera.position.z = 5;
-
-        function animate() {
-            requestAnimationFrame(animate);
-            book.rotation.y += 0.005;
-            book.position.y = Math.sin(Date.now() * 0.001) * 0.2;
-            renderer.render(scene, camera);
-        }
+        function animate() { requestAnimationFrame(animate); book.rotation.y += 0.005; book.position.y = Math.sin(Date.now() * 0.001) * 0.2; renderer.render(scene, camera); }
         animate();
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
         
-        // --- DYNAMIC BOOK LOADING ---
+        // DYNAMIC BOOK LOADING
         const bookListContainer = document.getElementById('browse');
-        
         function renderBookCards() {
-            bookListContainer.innerHTML = ''; // Clear existing cards
+            bookListContainer.innerHTML = '';
             books.forEach(bookData => {
                 const card = document.createElement('div');
                 card.className = 'glassmorphism p-6 rounded-xl hover-scale book-card';
                 card.setAttribute('data-book-id', bookData.id);
-                card.innerHTML = `
-                    <h3 class="text-xl font-semibold mb-2">${bookData.title}</h3>
-                    <p class="text-gray-300 mb-4">${bookData.genre} | ${bookData.pages}</p>
-                    <button class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors w-full">
-                        View Details
-                    </button>
-                `;
+                card.innerHTML = `<h3 class="text-xl font-semibold mb-2">${bookData.title}</h3><p class="text-gray-300 mb-4">${bookData.genre} | ${bookData.pages}</p><button class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors w-full">View Details</button>`;
                 bookListContainer.appendChild(card);
             });
             addCardEventListeners();
@@ -155,10 +139,8 @@
         // Modal functionality
         const modal = document.getElementById('book-modal');
         const closeModalBtn = document.getElementById('close-modal');
-
         function addCardEventListeners() {
-            const bookCards = document.querySelectorAll('.book-card');
-            bookCards.forEach(card => {
+            document.querySelectorAll('.book-card').forEach(card => {
                 card.querySelector('button').addEventListener('click', () => {
                     const bookId = parseInt(card.getAttribute('data-book-id'));
                     const bookData = books.find(b => b.id === bookId);
@@ -168,7 +150,6 @@
                     document.getElementById('book-pages').textContent = `Length: ${bookData.pages}`;
                     document.getElementById('book-description').textContent = bookData.description;
                     document.getElementById('book-image').src = bookData.image;
-
                     const readBtn = document.getElementById('read-btn');
                     const downloadBtn = document.getElementById('download-btn');
                     
@@ -181,17 +162,11 @@
                         readBtn.style.display = 'none';
                         downloadBtn.style.display = 'none';
                     }
-                    
                     modal.style.display = 'block';
                 });
             });
         }
-
-        closeModalBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-        
-        // Initial render
+        closeModalBtn.addEventListener('click', () => { modal.style.display = 'none'; });
         renderBookCards();
     </script>
 </body>
