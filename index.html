@@ -1,159 +1,62 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StorySphere - 3D Novel Reader</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            overflow-x: hidden;
-        }
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
-        }
-        .glassmorphism {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
-        .hover-scale {
-            transition: transform 0.3s ease;
-        }
-        .hover-scale:hover {
-            transform: scale(1.05);
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 20;
-            overflow-y: auto;
-        }
-        .modal-content {
-            max-width: 800px;
-            margin: 2rem auto;
-        }
-        .star-rating .star {
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: #ccc;
-        }
-        .star-rating .star.filled {
-            color: #ffd700;
-        }
-        .popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 30;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-        }
+        html { scroll-behavior: smooth; }
+        body { overflow-x: hidden; }
+        #canvas-container, #splash-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #111827; display: flex; justify-content: center; align-items: center; z-index: 100; color: #fff; flex-direction: column; opacity: 1; transition: opacity 1s ease-out; }
+        #splash-screen.hidden { opacity: 0; pointer-events: none; }
+        .glassmorphism { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.05); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; overflow-y: auto; }
+        .modal-content { max-width: 800px; margin: 2rem auto; }
+        .social-icon { transition: transform 0.3s ease; }
+        .social-icon:hover { transform: scale(1.2); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white">
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <h1 class="text-5xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">Welcome to StorySphere</h1>
+        <p class="text-xl mt-4">Dive into a World of Stories...</p>
+    </div>
+
     <div id="canvas-container"></div>
     <div class="relative z-10 min-h-screen flex flex-col">
-        <!-- Header -->
         <header class="glassmorphism p-4 flex justify-between items-center">
             <h1 class="text-3xl font-bold tracking-tight">StorySphere</h1>
             <nav class="space-x-6">
-                <a href="#home" class="text-lg hover:text-pink-300 transition-colors">Home</a>
+                <a href="#" class="text-lg hover:text-pink-300 transition-colors">Home</a>
                 <a href="#browse" class="text-lg hover:text-pink-300 transition-colors">Browse</a>
                 <a href="#about" class="text-lg hover:text-pink-300 transition-colors">About</a>
             </nav>
         </header>
 
-        <!-- Main Content -->
         <main class="flex-grow flex flex-col items-center justify-center py-12 px-4">
             <div class="text-center max-w-2xl">
-                <h2 class="text-4xl md:text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">
-                    Dive into Stories with 3D Magic
-                </h2>
-                <p class="text-lg md:text-xl text-gray-200 mb-8">
-                    Experience novels and stories like never before with our immersive 3D interface.
-                </p>
+                <h2 class="text-4xl md:text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">Dive into Stories with 3D Magic</h2>
+                <p class="text-lg md:text-xl text-gray-200 mb-8">Experience novels and stories like never before with our immersive 3D interface.</p>
             </div>
-
-            <!-- Book List -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full">
-                <div class="glassmorphism p-6 rounded-xl hover-scale book-card" data-book-id="1">
-                    <h3 class="text-xl font-semibold mb-2">The Cosmic Voyage</h3>
-                    <p class="text-gray-300 mb-4">Sci-Fi | 350 pages</p>
-                    <button class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors">
-                        View Details
-                    </button>
-                </div>
-                <div class="glassmorphism p-6 rounded-xl hover-scale book-card" data-book-id="2">
-                    <h3 class="text-xl font-semibold mb-2">Moonlit Secrets</h3>
-                    <p class="text-gray-300 mb-4">Fantasy | 300 pages</p>
-                    <button class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors">
-                        View Details
-                    </button>
-                </div>
-                <div class="glassmorphism p-6 rounded-xl hover-scale book-card" data-book-id="3">
-                    <h3 class="text-xl font-semibold mb-2">Echoes of Eternity</h3>
-                    <p class="text-gray-300 mb-4">Mystery | 280 pages</p>
-                    <button class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors">
-                        View Details
-                    </button>
-                </div>
+            
+            <div id="browse" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full">
+                <!-- Book cards will be inserted here by JavaScript -->
             </div>
         </main>
 
-        <!-- Modal for Book Details -->
+        <section id="about" class="py-12 px-4">
+            <div class="max-w-4xl mx-auto glassmorphism p-8 rounded-xl">
+                <h2 class="text-3xl font-bold text-center mb-4">About StorySphere</h2>
+                <p class="text-center text-gray-200">StorySphere is a magical place where stories come to life. We believe in the power of imagination and offer an immersive reading experience that blends technology with the timeless art of storytelling. Dive in and explore new worlds!</p>
+            </div>
+        </section>
+
         <div id="book-modal" class="modal glassmorphism">
             <div class="modal-content p-6 rounded-xl">
                 <div class="flex flex-col md:flex-row gap-6">
@@ -163,96 +66,58 @@
                         <p id="book-genre" class="text-gray-300 mb-2"></p>
                         <p id="book-pages" class="text-gray-300 mb-4"></p>
                         <p id="book-description" class="text-gray-200 mb-6"></p>
-                        <div class="star-rating mb-4">
-                            <span class="star" data-value="1">★</span>
-                            <span class="star" data-value="2">★</span>
-                            <span class="star" data-value="3">★</span>
-                            <span class="star" data-value="4">★</span>
-                            <span class="star" data-value="5">★</span>
+                        <div class="flex gap-4 mb-6">
+                            <a id="read-btn" href="#" target="_blank" class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors">Read Now</a>
+                            <a id="download-btn" href="#" download class="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors">Download</a>
+                            <button id="close-modal" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">Close</button>
                         </div>
-                        <div class="flex gap-4">
-                            <button id="read-btn" class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors">
-                                Read Now
-                            </button>
-                            <button id="download-btn" class="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors">
-                                Download
-                            </button>
-                            <button id="close-modal" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                                Close
-                            </button>
+                         <div class="flex justify-center space-x-6 mt-4">
+                            <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-tiktok"></i></a>
+                            <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-whatsapp"></i></a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Popup for Story Sale -->
-        <div id="sale-popup" class="popup glassmorphism p-6 rounded-xl">
-            <h3 class="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">
-                Story Available for Sale!
-            </h3>
-            <p class="text-lg text-gray-200 mb-6">
-                Visit this story for sale available at our partner store.
-            </p>
-            <a id="store-link" href="https://noore-elegance-store.vercel.app/" target="_blank" class="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 transition-colors inline-block">
-                Visit Store
-            </a>
-            <button id="close-popup" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors mt-4">
-                Continue to Story
-            </button>
-        </div>
-
-        <!-- Footer -->
-        <footer class="glassmorphism p-4 text-center text-gray-300">
+        <footer class="glassmorphism p-6 text-center text-gray-300">
+            <div class="flex justify-center space-x-6 mb-4">
+                <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-tiktok"></i></a>
+                <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-whatsapp"></i></a>
+            </div>
             <p>&copy; 2025 StorySphere. All rights reserved.</p>
         </footer>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="data.js"></script>
     <script>
-        // Three.js setup
+        // Splash Screen Logic
+        const splashScreen = document.getElementById('splash-screen');
+        setTimeout(() => {
+            splashScreen.classList.add('hidden');
+        }, 3000);
+
+        // Three.js setup (same as before)
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-        // Create a 3D book model
         const bookGeometry = new THREE.BoxGeometry(2, 3, 0.3);
         const bookTexture = new THREE.TextureLoader().load('https://images.unsplash.com/photo-1544716278-ca5e3f4ebf0c?auto=format&fit=crop&w=200');
         const bookMaterial = new THREE.MeshStandardMaterial({ map: bookTexture, roughness: 0.4, metalness: 0.2 });
         const book = new THREE.Mesh(bookGeometry, bookMaterial);
         scene.add(book);
-
-        // Add lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
         directionalLight.position.set(5, 5, 5);
         scene.add(directionalLight);
-
-        // Camera position
         camera.position.z = 5;
 
-        // Mouse interaction for 3D book
-        let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
-
-        document.addEventListener('mousedown', () => isDragging = true);
-        document.addEventListener('mouseup', () => isDragging = false);
-        document.addEventListener('mousemove', (event) => {
-            if (isDragging) {
-                const deltaMove = {
-                    x: event.clientX - previousMousePosition.x,
-                    y: event.clientY - previousMousePosition.y
-                };
-                book.rotation.y += deltaMove.x * 0.01;
-                book.rotation.x += deltaMove.y * 0.01;
-            }
-            previousMousePosition = { x: event.clientX, y: event.clientY };
-        });
-
-        // Animation loop with floating effect
         function animate() {
             requestAnimationFrame(animate);
             book.rotation.y += 0.005;
@@ -260,109 +125,74 @@
             renderer.render(scene, camera);
         }
         animate();
-
-        // Handle window resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        // Book data
-        const books = {
-            1: {
-                title: "The Cosmic Voyage",
-                genre: "Sci-Fi",
-                pages: "350 pages",
-                description: "An epic journey through the stars, uncovering the secrets of a lost civilization.",
-                image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=200"
-            },
-            2: {
-                title: "Moonlit Secrets",
-                genre: "Fantasy",
-                pages: "300 pages",
-                description: "A magical tale of hidden realms and ancient prophecies under the moonlight.",
-                image: "https://images.unsplash.com/photo-1516979187457-6376b1383696?auto=format&fit=crop&w=200"
-            },
-            3: {
-                title: "Echoes of Eternity",
-                genre: "Mystery",
-                pages: "280 pages",
-                description: "A gripping mystery unraveling the truth behind a timeless enigma.",
-                image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200"
-            }
-        };
-
-        // Modal and Popup functionality
-        const modal = document.getElementById('book-modal');
-        const popup = document.getElementById('sale-popup');
-        const bookCards = document.querySelectorAll('.book-card');
-        const closeModalBtn = document.getElementById('close-modal');
-        const closePopupBtn = document.getElementById('close-popup');
-        const storeLink = document.getElementById('store-link');
-        let selectedBookId = null;
-
-        bookCards.forEach(card => {
-            card.querySelector('button').addEventListener('click', () => {
-                selectedBookId = card.getAttribute('data-book-id');
-                popup.style.display = 'block';
+        
+        // --- DYNAMIC BOOK LOADING ---
+        const bookListContainer = document.getElementById('browse');
+        
+        function renderBookCards() {
+            bookListContainer.innerHTML = ''; // Clear existing cards
+            books.forEach(bookData => {
+                const card = document.createElement('div');
+                card.className = 'glassmorphism p-6 rounded-xl hover-scale book-card';
+                card.setAttribute('data-book-id', bookData.id);
+                card.innerHTML = `
+                    <h3 class="text-xl font-semibold mb-2">${bookData.title}</h3>
+                    <p class="text-gray-300 mb-4">${bookData.genre} | ${bookData.pages}</p>
+                    <button class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors w-full">
+                        View Details
+                    </button>
+                `;
+                bookListContainer.appendChild(card);
             });
-        });
+            addCardEventListeners();
+        }
 
-        storeLink.addEventListener('click', () => {
-            console.log('Store link clicked: https://noore-elegance-store.vercel.app/');
-        });
+        // Modal functionality
+        const modal = document.getElementById('book-modal');
+        const closeModalBtn = document.getElementById('close-modal');
 
-        closePopupBtn.addEventListener('click', () => {
-            popup.style.display = 'none';
-            if (selectedBookId) {
-                const book = books[selectedBookId];
-                document.getElementById('book-title').textContent = book.title;
-                document.getElementById('book-genre').textContent = `Genre: ${book.genre}`;
-                document.getElementById('book-pages').textContent = `Length: ${book.pages}`;
-                document.getElementById('book-description').textContent = book.description;
-                document.getElementById('book-image').src = book.image;
-                modal.style.display = 'block';
-            }
-        });
+        function addCardEventListeners() {
+            const bookCards = document.querySelectorAll('.book-card');
+            bookCards.forEach(card => {
+                card.querySelector('button').addEventListener('click', () => {
+                    const bookId = parseInt(card.getAttribute('data-book-id'));
+                    const bookData = books.find(b => b.id === bookId);
+                    
+                    document.getElementById('book-title').textContent = bookData.title;
+                    document.getElementById('book-genre').textContent = `Genre: ${bookData.genre}`;
+                    document.getElementById('book-pages').textContent = `Length: ${bookData.pages}`;
+                    document.getElementById('book-description').textContent = bookData.description;
+                    document.getElementById('book-image').src = bookData.image;
+
+                    const readBtn = document.getElementById('read-btn');
+                    const downloadBtn = document.getElementById('download-btn');
+                    
+                    if (bookData.pdf) {
+                        readBtn.href = bookData.pdf;
+                        downloadBtn.href = bookData.pdf;
+                        readBtn.style.display = 'inline-block';
+                        downloadBtn.style.display = 'inline-block';
+                    } else {
+                        readBtn.style.display = 'none';
+                        downloadBtn.style.display = 'none';
+                    }
+                    
+                    modal.style.display = 'block';
+                });
+            });
+        }
 
         closeModalBtn.addEventListener('click', () => {
             modal.style.display = 'none';
-            resetRating();
         });
-
-        // Read and Download buttons
-        document.getElementById('read-btn').addEventListener('click', () => {
-            alert('Opening reader... (Placeholder for reader functionality)');
-        });
-
-        document.getElementById('download-btn').addEventListener('click', () => {
-            alert('Download started! (Placeholder for download functionality)');
-        });
-
-        // Rating system
-        const stars = document.querySelectorAll('.star');
-        let currentRating = 0;
-
-        stars.forEach(star => {
-            star.addEventListener('click', () => {
-                currentRating = parseInt(star.getAttribute('data-value'));
-                updateRating();
-                alert(`Rated ${currentRating} stars! (Placeholder for rating submission)`);
-            });
-        });
-
-        function updateRating() {
-            stars.forEach(star => {
-                const value = parseInt(star.getAttribute('data-value'));
-                star.classList.toggle('filled', value <= currentRating);
-            });
-        }
-
-        function resetRating() {
-            currentRating = 0;
-            stars.forEach(star => star.classList.remove('filled'));
-        }
+        
+        // Initial render
+        renderBookCards();
     </script>
 </body>
 </html>

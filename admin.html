@@ -1,106 +1,63 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StorySphere - Admin Panel</title>
-    <link rel="stylesheet" href="output.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .admin-table {
-            max-width: 1200px;
-            margin: 2rem auto;
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        #imagePreview {
-            max-width: 200px;
-            margin-top: 0.5rem;
-            display: none;
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
     <div class="container mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-6">Admin Panel - StorySphere</h1>
-        <div class="glassmorphism p-6 rounded-xl mb-6">
+        <h1 class="text-3xl font-bold mb-6 text-center">Admin Panel - StorySphere</h1>
+        
+        <!-- Add New Book Form -->
+        <div class="glassmorphism p-6 rounded-xl mb-6 max-w-2xl mx-auto">
             <h2 class="text-2xl font-semibold mb-4">Add New Book</h2>
             <form id="bookForm" class="space-y-4">
-                <div class="form-group">
+                <div>
                     <label for="title" class="block mb-1">Title</label>
                     <input type="text" id="title" class="w-full p-2 rounded-lg text-black" required>
                 </div>
-                <div class="form-group">
+                <div>
                     <label for="genre" class="block mb-1">Genre</label>
                     <input type="text" id="genre" class="w-full p-2 rounded-lg text-black" required>
                 </div>
-                <div class="form-group">
+                <div>
                     <label for="pages" class="block mb-1">Pages</label>
                     <input type="text" id="pages" class="w-full p-2 rounded-lg text-black" required>
                 </div>
-                <div class="form-group">
+                <div>
                     <label for="description" class="block mb-1">Description</label>
                     <textarea id="description" class="w-full p-2 rounded-lg text-black" rows="3" required></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="imageUpload" class="block mb-1">Upload Image</label>
-                    <input type="file" id="imageUpload" class="w-full p-2 rounded-lg text-black" accept="image/*" required>
-                    <img id="imagePreview" src="" alt="Image Preview">
+                <div>
+                    <label for="image" class="block mb-1">Image URL</label>
+                    <input type="url" id="image" class="w-full p-2 rounded-lg text-black" required>
                 </div>
-                <div class="form-group">
+                <div>
                     <label for="pdf" class="block mb-1">PDF URL (Optional)</label>
                     <input type="url" id="pdf" class="w-full p-2 rounded-lg text-black">
                 </div>
-                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">Add Book</button>
+                <button type="submit" class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors w-full">Add Book</button>
             </form>
         </div>
+
+        <!-- Book List Table -->
         <div class="glassmorphism p-6 rounded-xl">
             <h2 class="text-2xl font-semibold mb-4">Book List</h2>
-            <table id="bookTable" class="admin-table w-full text-left">
+            <table id="bookTable" class="w-full text-left">
                 <thead>
-                    <tr class="border-b">
+                    <tr class="border-b border-gray-600">
                         <th class="p-2">Title</th>
                         <th class="p-2">Genre</th>
-                        <th class="p-2">Pages</th>
                         <th class="p-2">Actions</th>
                     </tr>
                 </thead>
@@ -108,27 +65,20 @@
             </table>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-    <script>
-        let books = [
-            { id: 1, title: "The Cosmic Voyage", genre: "Sci-Fi", pages: "350 pages", description: "An epic journey through the stars.", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=200", pdf: "https://example.com/Notes_250817_050609.pdf" },
-            { id: 2, title: "Moonlit Secrets", genre: "Fantasy", pages: "300 pages", description: "A magical tale of hidden realms.", image: "https://images.unsplash.com/photo-1516979187457-6376b1383696?auto=format&fit=crop&w=200" },
-            { id: 3, title: "Echoes of Eternity", genre: "Mystery", pages: "280 pages", description: "A gripping mystery unraveling truth.", image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200" },
-            { id: 4, title: "The Life of Average Pakhtoon Boy", genre: "Drama", pages: "200 pages", description: "A heartfelt journey of a young Pakhtoon boy.", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=200", pdf: "https://example.com/Notes_250817_050609.pdf" }
-        ];
 
+    <script src="data.js"></script>
+    <script>
         function renderBooks() {
             const tbody = document.getElementById('bookTableBody');
             tbody.innerHTML = '';
             books.forEach(book => {
                 const row = document.createElement('tr');
+                row.className = 'border-b border-gray-700';
                 row.innerHTML = `
                     <td class="p-2">${book.title}</td>
                     <td class="p-2">${book.genre}</td>
-                    <td class="p-2">${book.pages}</td>
                     <td class="p-2">
-                        <button class="bg-yellow-500 text-white px-2 py-1 rounded-lg hover:bg-yellow-600 edit-btn" data-id="${book.id}">Edit</button>
-                        <button class="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 delete-btn" data-id="${book.id}">Delete</button>
+                        <button class="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 text-sm" onclick="deleteBook(${book.id})">Delete</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -137,70 +87,30 @@
 
         document.getElementById('bookForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const imageInput = document.getElementById('imageUpload');
-            const imageFile = imageInput.files[0];
-            let imageUrl = '';
-            if (imageFile) {
-                // Simulate upload by creating a data URL (for demo; replace with actual upload logic)
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imageUrl = e.target.result;
-                    saveBook(imageUrl);
-                };
-                reader.readAsDataURL(imageFile);
-            } else {
-                saveBook(document.getElementById('image').value); // Fallback to URL input if no file
-            }
-        });
-
-        function saveBook(imageUrl) {
             const newBook = {
-                id: Date.now(),
+                id: Date.now(), // Unique ID based on timestamp
                 title: document.getElementById('title').value,
                 genre: document.getElementById('genre').value,
                 pages: document.getElementById('pages').value,
                 description: document.getElementById('description').value,
-                image: imageUrl || document.getElementById('image').value, // Use uploaded image or URL
+                image: document.getElementById('image').value,
                 pdf: document.getElementById('pdf').value || null
             };
             books.push(newBook);
             renderBooks();
             document.getElementById('bookForm').reset();
-            document.getElementById('imagePreview').style.display = 'none';
+            alert('Book added! NOTE: This change is temporary. To make it permanent, you must copy the updated "books" array from the console and paste it into your data.js file.');
+            console.log('UPDATED BOOK ARRAY:');
+            console.log(JSON.stringify(books, null, 2));
+        });
+
+        function deleteBook(id) {
+            books = books.filter(book => book.id !== id);
+            renderBooks();
+            alert('Book deleted! NOTE: This change is temporary. To make it permanent, you must copy the updated "books" array from the console and paste it into your data.js file.');
+            console.log('UPDATED BOOK ARRAY:');
+            console.log(JSON.stringify(books, null, 2));
         }
-
-        document.getElementById('imageUpload').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('imagePreview').src = e.target.result;
-                    document.getElementById('imagePreview').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        document.getElementById('bookTableBody').addEventListener('click', (e) => {
-            if (e.target.classList.contains('delete-btn')) {
-                const id = parseInt(e.target.getAttribute('data-id'));
-                books = books.filter(book => book.id !== id);
-                renderBooks();
-            } else if (e.target.classList.contains('edit-btn')) {
-                const id = parseInt(e.target.getAttribute('data-id'));
-                const book = books.find(b => b.id === id);
-                if (book) {
-                    document.getElementById('title').value = book.title;
-                    document.getElementById('genre').value = book.genre;
-                    document.getElementById('pages').value = book.pages;
-                    document.getElementById('description').value = book.description;
-                    document.getElementById('imageUpload').value = ''; // Reset file input
-                    document.getElementById('imagePreview').style.display = 'none';
-                    document.getElementById('pdf').value = book.pdf || '';
-                    books = books.filter(b => b.id !== id);
-                }
-            }
-        });
 
         renderBooks();
     </script>
