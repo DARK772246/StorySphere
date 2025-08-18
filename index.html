@@ -48,11 +48,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script>
+        // --- SUPABASE SETUP ---
         const SUPABASE_URL = 'https://zovzpiolbqezdjghhrgt.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdnpwaW9sYnFlemRqZ2hocmd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0Nzc0NzMsImV4cCI6MjA3MTA1MzQ3M30.t_dvIsnbwUFsgB1Bs1gcyo_Mic-z3i0g6pqMeQIoiXI';
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // --- UI ELEMENTS AND STATE ---
         const splashScreen = document.getElementById('splash-screen');
         const bookListContainer = document.getElementById('browse');
         const bookModal = document.getElementById('book-modal');
@@ -60,13 +62,38 @@
         let books = [];
         let selectedBookId = null;
 
+        // --- EVENT LISTENERS ---
         document.getElementById('enter-btn').addEventListener('click', () => { splashScreen.classList.add('hidden'); });
         document.getElementById('continue-btn').addEventListener('click', () => { offerPopup.style.display = 'none'; showBookDetails(selectedBookId); });
         document.getElementById('close-modal').addEventListener('click', () => { bookModal.style.display = 'none'; });
 
-        async function getBooks() { /* ... unchanged ... */ }
-        function renderBookCards() { /* ... unchanged ... */ }
-        function addCardEventListeners() { /* ... unchanged ... */ }
+        // --- CORE FUNCTIONS ---
+        async function getBooks() {
+            const { data, error } = await supabase.from('books').select('*');
+            if (error) { console.error('Error fetching books:', error); bookListContainer.innerHTML = `<p class="text-red-400 text-center col-span-full">Error loading stories. Please check Supabase connection.</p>`; } else { books = data; renderBookCards(); }
+        }
+
+        function renderBookCards() {
+            bookListContainer.innerHTML = '';
+            if (books.length === 0) { bookListContainer.innerHTML = `<p class="text-gray-300 text-center col-span-full">No stories found. Add some from the admin panel!</p>`; return; }
+            books.forEach(bookData => {
+                const card = document.createElement('div');
+                card.className = 'glassmorphism p-6 rounded-xl hover-scale book-card';
+                card.setAttribute('data-book-id', bookData.id);
+                card.innerHTML = `<h3 class="text-xl font-semibold mb-2">${bookData.title}</h3><p class="text-gray-300 mb-4">${bookData.genre} | ${bookData.pages}</p><button class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors w-full">View Details</button>`;
+                bookListContainer.appendChild(card);
+            });
+            addCardEventListeners();
+        }
+        
+        function addCardEventListeners() {
+            document.querySelectorAll('.book-card').forEach(card => {
+                card.querySelector('button').addEventListener('click', () => {
+                    selectedBookId = parseInt(card.getAttribute('data-book-id'));
+                    offerPopup.style.display = 'block';
+                });
+            });
+        }
 
         function showBookDetails(bookId) {
             const bookData = books.find(b => b.id === bookId);
@@ -80,19 +107,16 @@
             const readBtn = document.getElementById('read-btn');
             const downloadBtn = document.getElementById('download-btn');
             
-            // --- THIS IS THE CRITICAL CHANGE ---
-            // We now check if there is story_text to read.
+            // --- THIS IS THE CORRECTED LOGIC ---
             if (bookData.story_text) {
-                // Link to the new reader page and pass the book's ID
                 const readerUrl = `reader.html?id=${bookData.id}`;
                 readBtn.href = readerUrl;
-                readBtn.removeAttribute('target');
+                readBtn.removeAttribute('target'); 
                 readBtn.style.display = 'inline-block';
             } else {
                 readBtn.style.display = 'none';
             }
             
-            // The download button still links to the PDF if it exists
             if (bookData.pdf) {
                 downloadBtn.href = bookData.pdf;
                 downloadBtn.style.display = 'inline-block';
@@ -103,34 +127,10 @@
             bookModal.style.display = 'block';
         }
 
-        // --- Unchanged Helper and Initialization Functions ---
-        async function getBooks() {
-            const { data, error } = await supabase.from('books').select('*');
-            if (error) { console.error('Error fetching books:', error); bookListContainer.innerHTML = `<p class="text-red-400 text-center col-span-full">Error loading stories. Please check Supabase connection.</p>`; } else { books = data; renderBookCards(); }
-        }
-        function renderBookCards() {
-            bookListContainer.innerHTML = '';
-            if (books.length === 0) { bookListContainer.innerHTML = `<p class="text-gray-300 text-center col-span-full">No stories found. Add some from the admin panel!</p>`; return; }
-            books.forEach(bookData => {
-                const card = document.createElement('div');
-                card.className = 'glassmorphism p-6 rounded-xl hover-scale book-card';
-                card.setAttribute('data-book-id', bookData.id);
-                card.innerHTML = `<h3 class="text-xl font-semibold mb-2">${bookData.title}</h3><p class="text-gray-300 mb-4">${bookData.genre} | ${bookData.pages}</p><button class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors w-full">View Details</button>`;
-                bookListContainer.appendChild(card);
-            });
-            addCardEventListeners();
-        }
-        function addCardEventListeners() {
-            document.querySelectorAll('.book-card').forEach(card => {
-                card.querySelector('button').addEventListener('click', () => {
-                    selectedBookId = parseInt(card.getAttribute('data-book-id'));
-                    offerPopup.style.display = 'block';
-                });
-            });
-        }
+        // --- INITIALIZATION ---
         getBooks();
 
-        // --- Unchanged 3D Scene ---
+        // --- THREE.JS SCENE ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true });
