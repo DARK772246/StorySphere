@@ -7,10 +7,38 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* --- NEW SPLASH SCREEN STYLES --- */
+        .pen {
+            width: 12px;
+            height: 50px;
+            background: #FFD700;
+            position: absolute;
+            transform-origin: bottom;
+            animation: write 3s ease-out forwards;
+            margin-top: -50px; /* Adjust positioning */
+            margin-left: -80px; /* Adjust positioning */
+        }
+        .text-reveal {
+            opacity: 0;
+            animation: fade 3s ease-out forwards;
+        }
+        @keyframes write {
+            0% { transform: translateX(-80px) rotate(30deg); }
+            100% { transform: translateX(80px) rotate(30deg); }
+        }
+        @keyframes fade {
+            0% { opacity: 0; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        #enter-btn { transition: all 0.3s; }
+        #enter-btn:hover { background-color: #92400e; }
+        
+        /* --- ORIGINAL STYLES --- */
         html { scroll-behavior: smooth; }
         body { overflow-x: hidden; }
-        #canvas-container, #splash-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #111827; display: flex; justify-content: center; align-items: center; z-index: 100; color: #fff; flex-direction: column; opacity: 1; transition: opacity 1s ease-out; }
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1f2937; display: flex; justify-content: center; align-items: center; z-index: 100; color: #fff; flex-direction: column; opacity: 1; transition: opacity 1s ease-out; }
         #splash-screen.hidden { opacity: 0; pointer-events: none; }
         .glassmorphism { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
         .hover-scale { transition: transform 0.3s ease; }
@@ -22,8 +50,17 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white">
-    <!-- Splash Screen -->
-    <div id="splash-screen"><h1 class="text-5xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">Welcome to StorySphere</h1><p class="text-xl mt-4">Dive into a World of Stories...</p></div>
+    <!-- NEW Interactive Splash Screen -->
+    <div id="splash-screen">
+        <div class="text-center">
+            <h1 class="text-4xl font-serif text-reveal">Storysphere</h1>
+            <div class="pen"></div>
+            <button id="enter-btn" class="mt-8 px-4 py-2 bg-amber-700 rounded text-lg font-semibold">
+              Explore Stories
+            </button>
+            <p class="mt-4 text-sm opacity-70">By Salman Khan Orakzai</p>
+        </div>
+    </div>
 
     <div id="canvas-container"></div>
     <div class="relative z-10 min-h-screen flex flex-col">
@@ -48,7 +85,8 @@
         // --- SUPABASE SETUP ---
         const SUPABASE_URL = 'https://zovzpiolbqezdjghhrgt.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdnpwaW9sYnFlemRqZ2hocmd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0Nzc0NzMsImV4cCI6MjA3MTA1MzQ3M30.t_dvIsnbwUFsgB1Bs1gcyo_Mic-z3i0g6pqMeQIoiXI';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { createClient } = window.supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // --- UI ELEMENTS ---
         const splashScreen = document.getElementById('splash-screen');
@@ -59,6 +97,9 @@
         let selectedBookId = null;
 
         // --- EVENT LISTENERS ---
+        document.getElementById('enter-btn').addEventListener('click', () => {
+            splashScreen.classList.add('hidden');
+        });
         document.getElementById('continue-btn').addEventListener('click', () => {
             offerPopup.style.display = 'none';
             showBookDetails(selectedBookId);
@@ -72,6 +113,7 @@
             const { data, error } = await supabase.from('books').select('*');
             if (error) {
                 console.error('Error fetching books:', error);
+                bookListContainer.innerHTML = `<p class="text-red-400 text-center col-span-full">Error loading stories. Please check your Supabase connection.</p>`;
             } else {
                 books = data;
                 renderBookCards();
@@ -80,6 +122,10 @@
 
         function renderBookCards() {
             bookListContainer.innerHTML = '';
+            if (books.length === 0) {
+                bookListContainer.innerHTML = `<p class="text-gray-300 text-center col-span-full">No stories found. Add some from the admin panel!</p>`;
+                return;
+            }
             books.forEach(bookData => {
                 const card = document.createElement('div');
                 card.className = 'glassmorphism p-6 rounded-xl hover-scale book-card';
@@ -124,7 +170,6 @@
         }
 
         // --- INITIALIZATION ---
-        setTimeout(() => { splashScreen.classList.add('hidden'); }, 3000);
         getBooks();
 
         // --- THREE.JS SCENE ---
