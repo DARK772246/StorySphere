@@ -1,70 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StorySphere - Reading</title>
-  <!-- Google AdSense Script -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6036065566084740"
-       crossorigin="anonymous"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { margin: 0; background: linear-gradient(135deg, #4B0082, #8A2BE2); color: #fff; font-family: 'Arial', sans-serif; overflow-x: hidden; position: relative; }
-    nav { background: rgba(0, 0, 0, 0.7); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-    nav a { color: #fff; margin: 0 15px; text-decoration: none; font-weight: bold; }
-    nav a:first-child { font-size: 1.5em; color: #FFD700; }
-    .content { max-width: 800px; margin: 20px auto; padding: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; backdrop-filter: blur(5px); position: relative; z-index: 1; }
-    .story-title { font-size: 1.5em; color: #FFD700; margin-bottom: 10px; }
-    .story-text { font-size: 1em; line-height: 1.6; color: #fff; margin-bottom: 20px; white-space: pre-wrap; }
-    footer { text-align: center; padding: 10px; font-size: 0.8em; color: #FFD700; opacity: 0.7; }
-    .butterfly { position: absolute; width: 20px; height: 20px; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFD700"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v-2h-2v2zm0-4h2V7h-2v5z"/></svg>') no-repeat center; background-size: contain; animation: fly 15s infinite linear; z-index: 0; }
-    @keyframes fly { from { transform: translate(0, 0); } to { transform: translate(100vw, 100vh); } }
-    .butterfly:nth-child(2) { animation-delay: 5s; }
-    .butterfly:nth-child(3) { animation-delay: 10s; }
-  </style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Reading - StorySphere</title><script src="https://cdn.tailwindcss.com"></script>
+    <style>body{background:#111827}.story-text{white-space:pre-wrap}</style>
 </head>
-<body>
-  <nav>
-    <a href="index.html">StorySphere</a>
-    <div>
-      <a href="index.html">Home</a>
-      <a href="index.html#browse">Browse</a>
-      <a href="index.html#about">About</a>
+<body class="text-white">
+    <nav class="bg-black bg-opacity-50 p-4 flex justify-between items-center sticky top-0 backdrop-blur-sm z-10">
+        <a href="index.html" class="text-2xl font-bold text-pink-500">StorySphere</a>
+        <a href="index.html" class="bg-pink-600 px-3 py-1 rounded-lg">Back to Library</a>
+    </nav>
+    <div class="max-w-3xl mx-auto p-4 md:p-8">
+        <h1 id="story-title" class="text-3xl md:text-4xl font-bold mb-4">Loading Story...</h1>
+        <p id="story-author" class="text-lg text-gray-400 mb-6"></p>
+        <p id="story-text" class="text-lg leading-relaxed"></p>
     </div>
-  </nav>
-  <div class="content">
-    <h1 id="story-title" class="story-title">Loading Story...</h1>
-    <p id="story-text" class="story-text"></p>
-  </div>
-  <footer>
-    <p>By Salman Khan Orakzai</p>
-  </footer>
-  <div class="butterfly" style="top: 10%; left: 10%;"></div>
-  <div class="butterfly" style="top: 30%; left: 70%;"></div>
-  <div class="butterfly" style="top: 60%; left: 20%;"></div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const SUPABASE_URL = 'https://zovzpiolbqezdjghhrgt.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdnpwaW9sYnFlemRqZ2hocmd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0Nzc0NzMsImV4cCI6MjA3MTA1MzQ3M30.t_dvIsnbwUFsgB1Bs1gcyo_Mic-z3i0g6pqMeQIoiXI';
-    const { createClient } = window.supabase;
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    async function loadStory() {
-        const bookId = new URLSearchParams(window.location.search).get('id');
-        if (!bookId) {
-            document.getElementById('story-title').textContent = "Error";
-            document.getElementById('story-text').textContent = "No story ID provided.";
-            return;
-        }
-        const { data, error } = await supabase.from('books').select('title, story_text').eq('id', bookId).single();
-        if (error) {
-            document.getElementById('story-title').textContent = "Story Not Found";
-            document.getElementById('story-text').textContent = "Error loading story.";
-        } else {
-            document.getElementById('story-title').textContent = data.title;
-            document.getElementById('story-text').textContent = data.story_text || "This story has no text yet.";
-        }
-    }
-    loadStory();
-  </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://zovzpiolbqezdjghhrgt.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdnpwaW9sYnFlemRqZ2hocmd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4Nzc0NzMsImV4cCI6MjA3MTA1MzQ3M30.t_dvIsnbwUFsgB1Bs1gcyo_Mic-z3i0g6pqMeQIoiXI';
+        const { createClient } = window.supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        async function loadStory(){const e=new URLSearchParams(window.location.search).get("id");if(!e)return;const{data,error}=await supabase.from("books").select("title, author, story_text").eq("id",e).single();error?(document.getElementById("story-title").textContent="Story Not Found"):(document.getElementById("story-title").textContent=data.title,document.getElementById("story-author").textContent=`By ${data.author}`,document.getElementById("story-text").textContent=data.story_text||"No story text available.")}loadStory();
+    </script>
 </body>
 </html>
