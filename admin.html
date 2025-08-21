@@ -1,50 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>StorySphere - Admin</title><script src="https://cdn.tailwindcss.com"></script>
-    <style>.glassmorphism{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1)}button:disabled{background-color:#4b5563;cursor:not-allowed}</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StorySphere - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>.glassmorphism { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); } input[type="file"] { color: #d1d5db; } input[type="file"]::file-selector-button { font-weight: bold; color: #111827; background-color: #f9a8d4; padding: 0.5rem 1rem; border: none; border-radius: 0.25rem; cursor: pointer; margin-right: 1rem; } button:disabled { background-color: #4b5563; cursor: not-allowed; }</style>
 </head>
 <body class="bg-gray-900 text-white">
-    <div class="container mx-auto p-4 md:p-6">
-        <h1 class="text-3xl font-bold mb-6 text-center">Admin Panel</h1>
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-6 text-center">Admin Panel - StorySphere</h1>
+        
+        <!-- *** SERIES MANAGEMENT SECTION (Ab Theek Hai) *** -->
         <div class="grid md:grid-cols-2 gap-6 mb-6">
-            <div class="glassmorphism p-6 rounded-xl"><h2 class="text-2xl font-semibold mb-4">Manage Series</h2><form id="seriesForm" class="space-y-4"><div><input type="text" id="seriesTitle" placeholder="Series Title" class="w-full p-2 rounded-lg text-black" required></div><button type="submit" class="bg-blue-600 text-white p-2 rounded-lg w-full">Create Series</button></form></div>
-            <div class="glassmorphism p-6 rounded-xl"><h2 class="text-2xl font-semibold mb-4">Existing Series</h2><div id="seriesList" class="space-y-2 max-h-48 overflow-y-auto"></div></div>
+            <div class="glassmorphism p-6 rounded-xl">
+                <h2 class="text-2xl font-semibold mb-4">Manage Series</h2>
+                <form id="seriesForm" class="space-y-4">
+                    <div><label for="seriesTitle" class="block mb-1">Series Title</label><input type="text" id="seriesTitle" class="w-full p-2 rounded-lg text-black" required></div>
+                    <div><label for="seriesDesc" class="block mb-1">Series Description</label><textarea id="seriesDesc" class="w-full p-2 rounded-lg text-black" rows="2"></textarea></div>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 w-full">Create New Series</button>
+                </form>
+            </div>
+            <div class="glassmorphism p-6 rounded-xl">
+                <h2 class="text-2xl font-semibold mb-4">Existing Series</h2>
+                <div id="seriesList" class="space-y-2 max-h-48 overflow-y-auto"></div>
+            </div>
         </div>
-        <div class="glassmorphism p-6 rounded-xl max-w-2xl mx-auto"><h2 class="text-2xl font-semibold mb-4">Publish New Book</h2><form id="bookForm" class="space-y-4">
-            <input type="text" id="title" placeholder="Title" class="w-full p-2 rounded-lg text-black" required>
-            <input type="text" id="author" placeholder="Author" class="w-full p-2 rounded-lg text-black" required>
-            <select id="bookSeries" class="w-full p-2 rounded-lg text-black"><option value="">No Series</option></select>
-            <input type="text" id="genre" placeholder="Genre" class="w-full p-2 rounded-lg text-black" required>
-            <input type="text" id="pages" placeholder="Pages" class="w-full p-2 rounded-lg text-black" required>
-            <textarea id="description" placeholder="Description" class="w-full p-2 rounded-lg text-black" rows="3" required></textarea>
-            <textarea id="story_text" placeholder="Story Text (Optional)" class="w-full p-2 rounded-lg text-black" rows="6"></textarea>
-            <div><label class="text-gray-400">Cover Image</label><input type="file" id="imageUpload" class="w-full text-gray-400" accept="image/*" required></div>
-            <div><label class="text-gray-400">PDF (Optional)</label><input type="file" id="pdfUpload" class="w-full text-gray-400" accept=".pdf"></div>
-            <div class="flex items-center"><input type="checkbox" id="is_private" class="h-4 w-4 rounded mr-2"><label for="is_private">Private Novel (18+)</label></div>
-            <button type="submit" id="submitBtn" class="bg-pink-600 text-white p-3 rounded-lg w-full font-bold">Add Book</button>
-        </form></div>
-        <div class="glassmorphism p-6 rounded-xl mt-6"><h2 class="text-2xl font-semibold mb-4">Current Book List</h2><div id="bookTableContainer" class="max-h-96 overflow-y-auto"><table id="bookTable" class="w-full text-left"><thead><tr class="border-b border-gray-700"><th class="p-2">Title</th><th class="p-2">Author</th><th class="p-2">Status</th><th class="p-2">Actions</th></tr></thead><tbody id="bookTableBody"></tbody></table></div></div>
+
+        <!-- Add New Book Form -->
+        <div class="glassmorphism p-6 rounded-xl mb-6 max-w-2xl mx-auto">
+            <h2 class="text-2xl font-semibold mb-4">Add New Book</h2>
+            <form id="bookForm" class="space-y-4">
+                <div><label for="title" class="block mb-1">Title</label><input type="text" id="title" class="w-full p-2 rounded-lg text-black" required></div>
+                <div><label for="author" class="block mb-1">Author / Writer</label><input type="text" id="author" class="w-full p-2 rounded-lg text-black" required></div>
+                <div>
+                    <label for="bookSeries" class="block mb-1">Select Series (Optional)</label>
+                    <select id="bookSeries" class="w-full p-2 rounded-lg text-black">
+                        <option value="">No Series</option>
+                    </select>
+                </div>
+                <div><label for="genre" class="block mb-1">Genre</label><input type="text" id="genre" class="w-full p-2 rounded-lg text-black" required></div>
+                <div><label for="pages" class="block mb-1">Pages</label><input type="text" id="pages" class="w-full p-2 rounded-lg text-black" required></div>
+                <div><label for="description" class="block mb-1">Description</label><textarea id="description" class="w-full p-2 rounded-lg text-black" rows="3" required></textarea></div>
+                <div><label for="story_text" class="block mb-1">Story Text</label><textarea id="story_text" class="w-full p-2 rounded-lg text-black" rows="6"></textarea></div>
+                <div><label for="imageUpload" class="block mb-1">Upload Image</label><input type="file" id="imageUpload" class="w-full p-2 rounded-lg" accept="image/*" required></div>
+                <div><label for="pdfUpload" class="block mb-1">Upload PDF (Optional)</label><input type="file" id="pdfUpload" class="w-full p-2 rounded-lg" accept=".pdf"></div>
+                <div class="flex items-center"><input type="checkbox" id="is_private" class="h-4 w-4 rounded mr-2"><label for="is_private">Make this a Private Novel (18+)</label></div>
+                <button type="submit" id="submitBtn" class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 w-full">Add Book to Database</button>
+            </form>
+        </div>
+        
+        <div class="glassmorphism p-6 rounded-xl">
+            <h2 class="text-2xl font-semibold mb-4">Current Book List</h2>
+            <div id="bookTableContainer" class="max-h-96 overflow-y-auto">
+                <table id="bookTable" class="w-full text-left">
+                    <thead><tr class="border-b border-gray-600"><th class="p-2">Title</th><th class="p-2">Author</th><th class="p-2">Status</th><th class="p-2">Actions</th></tr></thead>
+                    <tbody id="bookTableBody"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://zovzpiolbqezdjghhrgt.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdnpwaW9sYnFlemRqZ2hocmd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4Nzc0NzMsImV4cCI6MjA3MTA1MzQ3M30.t_dvIsnbwUFsgB1Bs1gcyo_Mic-z3i0g6pqMeQIoiXI';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdnpwaW9sYnFlemRqZ2hocmd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0Nzc0NzMsImV4cCI6MjA3MTA1MzQ3M30.t_dvIsnbwUFsgB1Bs1gcyo_Mic-z3i0g6pqMeQIoiXI';
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const seriesForm = document.getElementById('seriesForm'), bookForm = document.getElementById('bookForm');
+        const bookForm = document.getElementById('bookForm');
+        const seriesForm = document.getElementById('seriesForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        async function getSeries() {
+            const { data, error } = await supabase.from('series').select('*');
+            if (error) { console.error(error); return; }
+            const seriesListDiv = document.getElementById('seriesList');
+            const seriesDropdown = document.getElementById('bookSeries');
+            seriesListDiv.innerHTML = '';
+            seriesDropdown.innerHTML = '<option value="">No Series</option>';
+            data.forEach(series => {
+                const seriesItem = document.createElement('div');
+                seriesItem.className = 'flex justify-between items-center bg-gray-700 p-2 rounded';
+                seriesItem.innerHTML = `<span>${series.title}</span><button class="text-red-400 text-xs hover:text-red-200" onclick="deleteSeries(${series.id})">Delete</button>`;
+                seriesListDiv.appendChild(seriesItem);
+                const option = document.createElement('option');
+                option.value = series.id;
+                option.textContent = series.title;
+                seriesDropdown.appendChild(option);
+            });
+        }
+        seriesForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('seriesTitle').value;
+            const description = document.getElementById('seriesDesc').value;
+            const { error } = await supabase.from('series').insert([{ title, description }]);
+            if (error) { alert(error.message); } 
+            else { alert('Series created!'); seriesForm.reset(); getSeries(); }
+        });
+        async function deleteSeries(id) {
+            if (!confirm('Are you sure? This will NOT delete the books.')) return;
+            const { error } = await supabase.from('series').delete().eq('id', id);
+            if (error) { alert(error.message); } 
+            else { alert('Series deleted!'); getSeries(); }
+        }
+
+        bookForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitBtn.disabled = true; submitBtn.textContent = 'Uploading...';
+            try {
+                const imageFile = document.getElementById('imageUpload').files[0];
+                const pdfFile = document.getElementById('pdfUpload').files[0];
+                let imageUrl = null, pdfUrl = null;
+                if (imageFile) {
+                    const imagePath = `public/${Date.now()}_${imageFile.name}`;
+                    await supabase.storage.from('book_files').upload(imagePath, imageFile);
+                    imageUrl = supabase.storage.from('book_files').getPublicUrl(imagePath).data.publicUrl;
+                }
+                if (pdfFile) {
+                    const pdfPath = `public/${Date.now()}_${pdfFile.name}`;
+                    await supabase.storage.from('book_files').upload(pdfPath, pdfFile);
+                    pdfUrl = supabase.storage.from('book_files').getPublicUrl(pdfPath).data.publicUrl;
+                }
+                const newBook = {
+                    title: bookForm.title.value,
+                    author: bookForm.author.value,
+                    series_id: bookForm.bookSeries.value || null,
+                    genre: bookForm.genre.value,
+                    pages: bookForm.pages.value,
+                    description: bookForm.description.value,
+                    story_text: bookForm.story_text.value,
+                    image: imageUrl,
+                    pdf: pdfUrl,
+                    is_private: bookForm.is_private.checked
+                };
+                const { error: insertError } = await supabase.from('books').insert([newBook]);
+                if (insertError) throw insertError;
+                alert('Success! Book has been added.');
+                bookForm.reset();
+                getBooks();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                submitBtn.disabled = false; submitBtn.textContent = 'Add Book to Database';
+            }
+        });
+        function renderTable(books){const t=document.getElementById("bookTableBody");t.innerHTML="";books.forEach(e=>{const o=document.createElement("tr");o.className="border-b border-gray-700";const s=e.is_private?'<span class="text-red-400">Private</span>':'<span class="text-green-400">Public</span>';o.innerHTML=`<td class="p-2">${e.title}</td><td class="p-2">${e.author}</td><td class="p-2">${s}</td><td class="p-2"><button class="bg-red-500 text-white px-2 py-1 rounded-lg" onclick="deleteBook(${e.id})">Delete</button></td>`,t.appendChild(o)})}
+        async function getBooks(){const{data,error}=await supabase.from("books").select("*");if(error){console.error(error)}else{renderTable(data)}}
+        async function deleteBook(e){if(confirm("Are you sure?")){const{error:o}=await supabase.from("books").delete().eq("id",e);o?alert(o.message):(alert("Book deleted!"),getBooks())}}
         
-        async function getSeries(){const{data,error}=await supabase.from("series").select("*");if(error)return;const t=document.getElementById("seriesList"),s=document.getElementById("bookSeries");t.innerHTML="",s.innerHTML='<option value="">No Series</option>',data.forEach(e=>{const a=document.createElement("div");a.className="flex justify-between items-center bg-gray-700 p-2 rounded",a.innerHTML=`<span>${e.title}</span><button class="text-red-400 text-xs" onclick="deleteSeries(${e.id})">Del</button>`,t.appendChild(a);const i=document.createElement("option");i.value=e.id,i.textContent=e.title,s.appendChild(i)})}
-        seriesForm.addEventListener("submit",async e=>{e.preventDefault();const t=document.getElementById("seriesTitle").value;const{error}=await supabase.from("series").insert([{title:t}]);error?alert(error.message):(alert("Series created!"),seriesForm.reset(),getSeries())});
-        async function deleteSeries(e){if(!confirm("Are you sure?"))return;const{error}=await supabase.from("series").delete().eq("id",e);error?alert(error.message):(alert("Series deleted!"),getSeries())}
-        
-        async function getBooks(){const{data,error}=await supabase.from("books").select("*").order("created_at",{ascending:!1});error?console.error(error):renderTable(data)}
-        function renderTable(e){const t=document.getElementById("bookTableBody");t.innerHTML="",e.forEach(e=>{const s=document.createElement("tr"),a=e.is_private?'<span class="text-red-400">Private</span>':'<span class="text-green-400">Public</span>';s.innerHTML=`<td class="p-2">${e.title}</td><td class="p-2">${e.author||""}</td><td class="p-2">${a}</td><td class="p-2"><button class="bg-red-500 text-white px-2 py-1 rounded-lg" onclick="deleteBook(${e.id})">Delete</button>`,t.appendChild(s)})}
-        bookForm.addEventListener("submit",async e=>{e.preventDefault();const t=document.getElementById("submitBtn");t.disabled=!0,t.textContent="Uploading...";try{const e=document.getElementById("imageUpload").files[0],s=document.getElementById("pdfUpload").files[0];let a=null,i=null;if(e){const t=`public/books/${Date.now()}_${e.name}`;await supabase.storage.from("book_files").upload(t,e),a=supabase.storage.from("book_files").getPublicUrl(t).data.publicUrl}if(s){const e=`public/books/${Date.now()}_${s.name}`;await supabase.storage.from("book_files").upload(e,s),i=supabase.storage.from("book_files").getPublicUrl(e).data.publicUrl}const l={title:bookForm.title.value,author:bookForm.author.value,series_id:bookForm.bookSeries.value||null,genre:bookForm.genre.value,pages:bookForm.pages.value,description:bookForm.description.value,story_text:bookForm.story_text.value,image:a,pdf:i,is_private:bookForm.is_private.checked};const{error}=await supabase.from("books").insert([l]);if(error)throw error;alert("Success! Book published."),bookForm.reset(),getBooks()}catch(e){alert(`Error: ${e.message}`)}finally{t.disabled=!1,t.textContent="Add Book"}});
-        async function deleteBook(e){if(!confirm("Are you sure?"))return;const{error}=await supabase.from("books").delete().eq("id",e);error?alert(error.message):(alert("Book deleted!"),getBooks())}
-        
-        getSeries();
         getBooks();
+        getSeries();
     </script>
 </body>
 </html>
