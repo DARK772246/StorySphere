@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>StorySphere - Admin</title><script src="https://cdn.tailwindcss.com"></script>
-    <style>.glassmorphism{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2)}button:disabled{background-color:#4b5563;cursor:not-allowed}</style>
+    <style>.glassmorphism{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1)}button:disabled{background-color:#4b5563;cursor:not-allowed}</style>
 </head>
 <body class="bg-gray-900 text-white">
     <div class="container mx-auto p-4 md:p-6">
@@ -33,14 +33,18 @@
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const seriesForm = document.getElementById('seriesForm'), bookForm = document.getElementById('bookForm');
+        
         async function getSeries(){const{data,error}=await supabase.from("series").select("*");if(error)return;const t=document.getElementById("seriesList"),s=document.getElementById("bookSeries");t.innerHTML="",s.innerHTML='<option value="">No Series</option>',data.forEach(e=>{const a=document.createElement("div");a.className="flex justify-between items-center bg-gray-700 p-2 rounded",a.innerHTML=`<span>${e.title}</span><button class="text-red-400 text-xs" onclick="deleteSeries(${e.id})">Del</button>`,t.appendChild(a);const i=document.createElement("option");i.value=e.id,i.textContent=e.title,s.appendChild(i)})}
         seriesForm.addEventListener("submit",async e=>{e.preventDefault();const t=document.getElementById("seriesTitle").value;const{error}=await supabase.from("series").insert([{title:t}]);error?alert(error.message):(alert("Series created!"),seriesForm.reset(),getSeries())});
         async function deleteSeries(e){if(!confirm("Are you sure?"))return;const{error}=await supabase.from("series").delete().eq("id",e);error?alert(error.message):(alert("Series deleted!"),getSeries())}
+        
         async function getBooks(){const{data,error}=await supabase.from("books").select("*").order("created_at",{ascending:!1});error?console.error(error):renderTable(data)}
         function renderTable(e){const t=document.getElementById("bookTableBody");t.innerHTML="",e.forEach(e=>{const s=document.createElement("tr"),a=e.is_private?'<span class="text-red-400">Private</span>':'<span class="text-green-400">Public</span>';s.innerHTML=`<td class="p-2">${e.title}</td><td class="p-2">${e.author||""}</td><td class="p-2">${a}</td><td class="p-2"><button class="bg-red-500 text-white px-2 py-1 rounded-lg" onclick="deleteBook(${e.id})">Delete</button>`,t.appendChild(s)})}
         bookForm.addEventListener("submit",async e=>{e.preventDefault();const t=document.getElementById("submitBtn");t.disabled=!0,t.textContent="Uploading...";try{const e=document.getElementById("imageUpload").files[0],s=document.getElementById("pdfUpload").files[0];let a=null,i=null;if(e){const t=`public/books/${Date.now()}_${e.name}`;await supabase.storage.from("book_files").upload(t,e),a=supabase.storage.from("book_files").getPublicUrl(t).data.publicUrl}if(s){const e=`public/books/${Date.now()}_${s.name}`;await supabase.storage.from("book_files").upload(e,s),i=supabase.storage.from("book_files").getPublicUrl(e).data.publicUrl}const l={title:bookForm.title.value,author:bookForm.author.value,series_id:bookForm.bookSeries.value||null,genre:bookForm.genre.value,pages:bookForm.pages.value,description:bookForm.description.value,story_text:bookForm.story_text.value,image:a,pdf:i,is_private:bookForm.is_private.checked};const{error}=await supabase.from("books").insert([l]);if(error)throw error;alert("Success! Book published."),bookForm.reset(),getBooks()}catch(e){alert(`Error: ${e.message}`)}finally{t.disabled=!1,t.textContent="Add Book"}});
         async function deleteBook(e){if(!confirm("Are you sure?"))return;const{error}=await supabase.from("books").delete().eq("id",e);error?alert(error.message):(alert("Book deleted!"),getBooks())}
-        getSeries();getBooks();
+        
+        getSeries();
+        getBooks();
     </script>
 </body>
 </html>
