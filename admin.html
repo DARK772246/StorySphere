@@ -15,11 +15,11 @@
             <h2 class="text-2xl font-semibold mb-4 border-b border-gray-600 pb-2">Announce Upcoming Novel</h2>
             <div class="grid md:grid-cols-2 gap-6">
                 <form id="upcomingForm" class="space-y-4">
-                    <div><label for="upcomingTitle" class="block mb-1">Title</label><input type="text" id="upcomingTitle" class="w-full p-2 rounded-lg text-black" required></div>
-                    <div><label for="upcomingAuthor" class="block mb-1">Author</label><input type="text" id="upcomingAuthor" class="w-full p-2 rounded-lg text-black" required></div>
-                    <div><label for="upcomingTeaser" class="block mb-1">Teaser Text</label><textarea id="upcomingTeaser" class="w-full p-2 rounded-lg text-black" rows="2" required></textarea></div>
-                    <div><label for="upcomingRelease" class="block mb-1">Release Info (e.g., "Coming Soon")</label><input type="text" id="upcomingRelease" class="w-full p-2 rounded-lg text-black" required></div>
-                    <div><label for="upcomingImage" class="block mb-1">Cover Image</label><input type="file" id="upcomingImage" class="w-full p-2 rounded-lg" accept="image/*" required></div>
+                    <div><label for="upcomingTitle">Title</label><input type="text" id="upcomingTitle" class="w-full p-2 rounded-lg text-black" required></div>
+                    <div><label for="upcomingAuthor">Author</label><input type="text" id="upcomingAuthor" class="w-full p-2 rounded-lg text-black" required></div>
+                    <div><label for="upcomingTeaser">Teaser Text</label><textarea id="upcomingTeaser" class="w-full p-2 rounded-lg text-black" rows="2" required></textarea></div>
+                    <div><label for="upcomingRelease">Release Info</label><input type="text" id="upcomingRelease" class="w-full p-2 rounded-lg text-black" required></div>
+                    <div><label for="upcomingImage">Cover Image</label><input type="file" id="upcomingImage" class="w-full p-2 rounded-lg" accept="image/*" required></div>
                     <button type="submit" id="upcomingSubmitBtn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 w-full">Announce Novel</button>
                 </form>
                 <div>
@@ -47,11 +47,11 @@
         <div class="glassmorphism p-6 rounded-xl mb-6 max-w-2xl mx-auto">
             <h2 class="text-2xl font-semibold mb-4">Publish New Book</h2>
             <form id="bookForm" class="space-y-4">
-                <div><label for="title" class="block mb-1">Title</label><input type="text" id="title" class="w-full p-2 rounded-lg text-black" required></div>
-                <div><label for="author" class="block mb-1">Author</label><input type="text" id="author" class="w-full p-2 rounded-lg text-black" required></div>
-                <div><label for="bookSeries" class="block mb-1">Select Series</label><select id="bookSeries" class="w-full p-2 rounded-lg text-black"><option value="">No Series</option></select></div>
-                <div><label for="genre" class="block mb-1">Genre</label><input type="text" id="genre" class="w-full p-2 rounded-lg text-black" required></div>
-                <div><label for="pages" class="block mb-1">Pages</label><input type="text" id="pages" class="w-full p-2 rounded-lg text-black" required></div>
+                <div><label for="title">Title</label><input type="text" id="title" class="w-full p-2 rounded-lg text-black" required></div>
+                <div><label for="author">Author</label><input type="text" id="author" class="w-full p-2 rounded-lg text-black" required></div>
+                <div><label for="bookSeries">Select Series</label><select id="bookSeries" class="w-full p-2 rounded-lg text-black"><option value="">No Series</option></select></div>
+                <div><label for="genre">Genre</label><input type="text" id="genre" class="w-full p-2 rounded-lg text-black" required></div>
+                <div><label for="pages">Pages</label><input type="text" id="pages" class="w-full p-2 rounded-lg text-black" required></div>
                 <div><label for="description">Description</label><textarea id="description" class="w-full p-2 rounded-lg text-black" rows="3" required></textarea></div>
                 <div><label for="story_text">Story Text</label><textarea id="story_text" class="w-full p-2 rounded-lg text-black" rows="6"></textarea></div>
                 <div><label for="imageUpload">Upload Image</label><input type="file" id="imageUpload" class="w-full p-2 rounded-lg" accept="image/*" required></div>
@@ -74,96 +74,28 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://zovzpiolbqezdjghhrgt.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdnpwaW9sYnFlemRqZ2hocmd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0Nzc0NzMsImV4cCI6MjA3MTA1MzQ3M30.t_dvIsnbwUFsgB1Bs1gcyo_Mic-z3i0g6pqMeQIoiXI';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdnpwaW9sYnFlemRqZ2hocmd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4Nzc0NzMsImV4cCI6MjA3MTA1MzQ3M30.t_dvIsnbwUFsgB1Bs1gcyo_Mic-z3i0g6pqMeQIoiXI';
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- ALL 3 FORMS ---
         const upcomingForm = document.getElementById('upcomingForm');
         const seriesForm = document.getElementById('seriesForm');
         const bookForm = document.getElementById('bookForm');
 
-        // --- UPCOMING NOVELS LOGIC (THEEK HAI) ---
-        async function getUpcomingNovels() { /* ... unchanged ... */ }
-        upcomingForm.addEventListener('submit', async (e) => { /* ... unchanged ... */ });
-        async function deleteUpcoming(id) { /* ... unchanged ... */ }
+        async function getUpcomingNovels(){const{data,error}=await supabase.from("upcoming_novels").select("*").order("created_at",{ascending:!1});if(error)return void console.error("Error fetching upcoming novels:",error);const t=document.getElementById("upcomingList");t.innerHTML="",data.forEach(e=>{const s=document.createElement("div");s.className="flex justify-between items-center bg-gray-700 p-2 rounded",s.innerHTML=`<span>${e.title}</span><button class="text-red-400 text-xs hover:text-red-200" onclick="deleteUpcoming(${e.id})">Delete</button>`,t.appendChild(s)})}
+        upcomingForm.addEventListener("submit",async e=>{e.preventDefault();const t=document.getElementById("upcomingSubmitBtn");t.disabled=!0,t.textContent="Uploading...";try{const e=document.getElementById("upcomingImage").files[0];let s=null;if(e){const t=`public/upcoming_${Date.now()}_${e.name}`;await supabase.storage.from("book_files").upload(t,e),s=supabase.storage.from("book_files").getPublicUrl(t).data.publicUrl}const o={title:upcomingForm.upcomingTitle.value,author:upcomingForm.upcomingAuthor.value,teaser_text:upcomingForm.upcomingTeaser.value,release_date:upcomingForm.upcomingRelease.value,image:s};const{error}=await supabase.from("upcoming_novels").insert([o]);if(error)throw error;alert("Success! Upcoming novel has been announced."),upcomingForm.reset(),getUpcomingNovels()}catch(e){alert(`Error: ${e.message}`)}finally{t.disabled=!1,t.textContent="Announce Novel"}});
+        async function deleteUpcoming(e){if(confirm("Are you sure?")){const{error:t}=await supabase.from("upcoming_novels").delete().eq("id",e);t?alert(t.message):(alert("Announcement deleted!"),getUpcomingNovels())}}
+        async function getSeries(){const{data,error}=await supabase.from("series").select("*");if(error)return void console.error(error);const t=document.getElementById("seriesList"),e=document.getElementById("bookSeries");t.innerHTML="",e.innerHTML='<option value="">No Series</option>',data.forEach(s=>{const o=document.createElement("div");o.className="flex justify-between items-center bg-gray-700 p-2 rounded",o.innerHTML=`<span>${s.title}</span><button class="text-red-400 text-xs hover:text-red-200" onclick="deleteSeries(${s.id})">Delete</button>`,t.appendChild(o);const n=document.createElement("option");n.value=s.id,n.textContent=s.title,e.appendChild(n)})}
+        seriesForm.addEventListener("submit",async e=>{e.preventDefault();const t=document.getElementById("seriesTitle").value,s=document.getElementById("seriesDesc").value;const{error}=await supabase.from("series").insert([{title:t,description:s}]);error?alert(error.message):(alert("Series created!"),seriesForm.reset(),getSeries())});
+        async function deleteSeries(e){if(confirm("Are you sure?")){const{error:t}=await supabase.from("series").delete().eq("id",e);t?alert(t.message):(alert("Series deleted!"),getSeries())}}
+        async function getBooks(){const{data,error}=await supabase.from("books").select("*").order("created_at",{ascending:!1});error?console.error("Error fetching books:",error):renderTable(data)}
+        function renderTable(e){const t=document.getElementById("bookTableBody");t.innerHTML="",e.forEach(e=>{const s=document.createElement("tr"),o=e.is_private?'<span class="text-red-400">Private</span>':'<span class="text-green-400">Public</span>';s.innerHTML=`<td class="p-2">${e.title}</td><td class="p-2">${e.author}</td><td class="p-2">${o}</td><td class="p-2"><button class="bg-red-500 text-white px-2 py-1 rounded-lg" onclick="deleteBook(${e.id})">Delete</button>`,t.appendChild(s)})}
+        bookForm.addEventListener("submit",async e=>{e.preventDefault();const t=document.getElementById("submitBtn");t.disabled=!0,t.textContent="Uploading...";try{const e=document.getElementById("imageUpload").files[0],s=document.getElementById("pdfUpload").files[0];let o=null,n=null;if(e){const t=`public/books/${Date.now()}_${e.name}`;await supabase.storage.from("book_files").upload(t,e),o=supabase.storage.from("book_files").getPublicUrl(t).data.publicUrl}if(s){const e=`public/books/${Date.now()}_${s.name}`;await supabase.storage.from("book_files").upload(e,s),n=supabase.storage.from("book_files").getPublicUrl(e).data.publicUrl}const a={title:bookForm.title.value,author:bookForm.author.value,series_id:bookForm.bookSeries.value||null,genre:bookForm.genre.value,pages:bookForm.pages.value,description:bookForm.description.value,story_text:bookForm.story_text.value,image:o,pdf:n,is_private:bookForm.is_private.checked};const{error}=await supabase.from("books").insert([a]);if(error)throw error;alert("Success! Book has been published."),bookForm.reset(),getBooks()}catch(e){alert(`Error: ${e.message}`)}finally{t.disabled=!1,t.textContent="Add Book"}});
+        async function deleteBook(e){if(confirm("Are you sure?")){const{error:t}=await supabase.from("books").delete().eq("id",e);t?alert(t.message):(alert("Book deleted!"),getBooks())}}
         
-        // --- SERIES LOGIC (THEEK HAI) ---
-        async function getSeries() { /* ... unchanged ... */ }
-        seriesForm.addEventListener('submit', async (e) => { /* ... unchanged ... */ });
-        async function deleteSeries(id) { /* ... unchanged ... */ }
-
-        // --- PUBLISH BOOK LOGIC (WAPAS ADD KAR DIYA GAYA HAI) ---
-        async function getBooks() {
-            const { data, error } = await supabase.from('books').select('*').order('created_at', { ascending: false });
-            if (error) { console.error('Error fetching books:', error); } else { renderTable(data); }
-        }
-        function renderTable(books) {
-            const tbody = document.getElementById('bookTableBody');
-            tbody.innerHTML = '';
-            books.forEach(book => {
-                const row = document.createElement('tr');
-                const status = book.is_private ? '<span class="text-red-400">Private</span>' : '<span class="text-green-400">Public</span>';
-                row.innerHTML = `<td class="p-2">${book.title}</td><td class="p-2">${book.author}</td><td class="p-2">${status}</td><td class="p-2"><button class="bg-red-500 text-white px-2 py-1 rounded-lg" onclick="deleteBook(${book.id})">Delete</button></td>`;
-                tbody.appendChild(row);
-            });
-        }
-        bookForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true; submitBtn.textContent = 'Uploading...';
-            try {
-                const imageFile = document.getElementById('imageUpload').files[0];
-                const pdfFile = document.getElementById('pdfUpload').files[0];
-                let imageUrl = null, pdfUrl = null;
-                if (imageFile) {
-                    const imagePath = `public/books/${Date.now()}_${imageFile.name}`;
-                    await supabase.storage.from('book_files').upload(imagePath, imageFile);
-                    imageUrl = supabase.storage.from('book_files').getPublicUrl(imagePath).data.publicUrl;
-                }
-                if (pdfFile) {
-                    const pdfPath = `public/books/${Date.now()}_${pdfFile.name}`;
-                    await supabase.storage.from('book_files').upload(pdfPath, pdfFile);
-                    pdfUrl = supabase.storage.from('book_files').getPublicUrl(pdfPath).data.publicUrl;
-                }
-                const newBook = {
-                    title: bookForm.title.value,
-                    author: bookForm.author.value,
-                    series_id: bookForm.bookSeries.value || null,
-                    genre: bookForm.genre.value,
-                    pages: bookForm.pages.value,
-                    description: bookForm.description.value,
-                    story_text: bookForm.story_text.value,
-                    image: imageUrl,
-                    pdf: pdfUrl,
-                    is_private: bookForm.is_private.checked
-                };
-                const { error } = await supabase.from('books').insert([newBook]);
-                if (error) throw error;
-                alert('Success! Book has been published.');
-                bookForm.reset();
-                getBooks();
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            } finally {
-                submitBtn.disabled = false; submitBtn.textContent = 'Add Book';
-            }
-        });
-        async function deleteBook(id) {
-            if (!confirm('Are you sure?')) return;
-            const { error } = await supabase.from('books').delete().eq('id', id);
-            if (error) { alert(error.message); } else { alert('Book deleted!'); getBooks(); }
-        }
-
-        // --- INITIAL LOAD ---
         getUpcomingNovels();
         getSeries();
         getBooks();
-        // (Copying unchanged functions again to be safe)
-        async function getSeries(){const{data,error}=await supabase.from("series").select("*");if(error)return void console.error(error);const t=document.getElementById("seriesList"),e=document.getElementById("bookSeries");t.innerHTML="",e.innerHTML='<option value="">No Series</option>',data.forEach(s=>{const n=document.createElement("div");n.className="flex justify-between items-center bg-gray-700 p-2 rounded",n.innerHTML=`<span>${s.title}</span><button class="text-red-400 text-xs hover:text-red-200" onclick="deleteSeries(${s.id})">Delete</button>`,t.appendChild(n);const o=document.createElement("option");o.value=s.id,o.textContent=s.title,e.appendChild(o)})}
-        async function deleteSeries(e){if(confirm("Are you sure?")){const{error:t}=await supabase.from("series").delete().eq("id",e);t?alert(t.message):(alert("Series deleted!"),getSeries())}}
-        async function getUpcomingNovels(){const{data,error}=await supabase.from("upcoming_novels").select("*").order("created_at",{ascending:!1});if(error)return void console.error("Error fetching upcoming novels:",error);const t=document.getElementById("upcomingList");t.innerHTML="",data.forEach(e=>{const s=document.createElement("div");s.className="flex justify-between items-center bg-gray-700 p-2 rounded",s.innerHTML=`<span>${e.title}</span><button class="text-red-400 text-xs hover:text-red-200" onclick="deleteUpcoming(${e.id})">Delete</button>`,t.appendChild(s)})}
-        async function deleteUpcoming(e){if(confirm("Are you sure?")){const{error:t}=await supabase.from("upcoming_novels").delete().eq("id",e);t?alert(t.message):(alert("Announcement deleted!"),getUpcomingNovels())}}
     </script>
 </body>
 </html>

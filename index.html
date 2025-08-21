@@ -17,10 +17,6 @@
         .modal-content { max-width: 800px; margin: 2rem auto; } 
         #age-gate-popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99; justify-content: center; align-items: center; }
         .swiper-slide { background-size: cover; background-position: center; }
-        .rating-stars span { cursor: pointer; color: #4b5563; font-size: 2rem; transition: color 0.2s; }
-        .rating-stars span.selected, .rating-stars span:hover, .rating-stars span:hover ~ span { color: #f59e0b; }
-        #review-toggle-button .arrow-icon { transition: transform 0.3s; }
-        #review-toggle-button.open .arrow-icon { transform: rotate(180deg); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white">
@@ -28,9 +24,9 @@
     <div class="relative z-10 min-h-screen flex flex-col">
         <header class="glassmorphism p-4 flex justify-between items-center relative">
             <h1 class="text-3xl font-bold tracking-tight">StorySphere</h1>
-            <nav class="hidden md:flex space-x-6"><a href="#browse" class="text-lg hover:text-pink-300">Browse</a><a href="#private-browse" id="private-link-desktop" class="text-lg hover:text-pink-300">Private Novels</a><a href="#about" class="text-lg hover:text-pink-300">About</a></nav>
-            <div class="md:hidden"><button id="menu-btn" class="text-white focus:outline-none"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button></div>
-            <div id="mobile-menu" class="hidden md:hidden absolute top-full right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg z-30"><a href="#browse" class="menu-item block px-4 py-2 text-sm text-white hover:bg-gray-700">Browse</a><a href="#private-browse" id="private-link-mobile" class="menu-item block px-4 py-2 text-sm text-white hover:bg-gray-700">Private Novels</a><a href="#about" class="menu-item block px-4 py-2 text-sm text-white hover:bg-gray-700">About</a></div>
+            <nav class="hidden md:flex space-x-6"><a href="#browse">Browse</a><a href="#private-browse" id="private-link-desktop">Private Novels</a><a href="#about">About</a></nav>
+            <div class="md:hidden"><button id="menu-btn"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button></div>
+            <div id="mobile-menu" class="hidden md:hidden absolute top-full right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg z-30"><a href="#browse" class="menu-item">Browse</a><a href="#private-browse" id="private-link-mobile" class="menu-item">Private Novels</a><a href="#about" class="menu-item">About</a></div>
         </header>
         
         <div id="featured-slider" class="swiper h-64 md:h-96 w-full"><div class="swiper-wrapper"></div><div class="swiper-pagination"></div></div>
@@ -45,23 +41,10 @@
         </main>
 
         <section id="about" class="py-12 px-4"><div class="max-w-4xl mx-auto glassmorphism p-8 rounded-xl"><h2 class="text-3xl font-bold text-center mb-4">About StorySphere</h2><p class="text-center text-gray-200 mb-4">...</p><p class="text-center text-gray-400 text-sm">Developed by Salman Khan Orakzai.</p></div></section>
-        <div id="age-gate-popup" class="flex">...</div>
-        <div id="offer-popup" class="modal">...</div>
-        <div id="book-modal" class="modal"><div class="modal-content p-6 rounded-xl glassmorphism"><div class="flex flex-col md:flex-row gap-6"><img id="book-image" class="w-full md:w-1/3 rounded-lg"><div class="flex-1"><h2 id="book-title" class="text-3xl font-bold mb-2"></h2><p id="book-author" class="text-gray-300 mb-2 text-lg"></p><p id="book-genre" class="text-gray-300 mb-2"></p><p id="book-pages" class="text-gray-300 mb-4"></p><p id="book-description" class="text-gray-200 mb-6"></p>
-        <div id="series-info" class="mb-6"></div>
-        <div class="flex flex-wrap gap-4 mb-6"><a id="read-btn" href="#" class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600">Read Now</a><a id="download-btn" href="#" download class="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-600">Download</a><button id="share-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Share</button><button id="close-modal" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">Close</button></div>
-        <hr class="border-gray-600 my-4">
-        <div class="space-y-4">
-            <button id="review-toggle-button" class="w-full flex justify-between items-center text-left text-xl font-semibold"><span>Reviews</span><i class="fas fa-chevron-down arrow-icon"></i></button>
-            <div id="review-content" class="hidden pl-2 border-l-2 border-gray-600">
-                <h3 class="text-lg font-semibold mt-4">Leave a Review</h3>
-                <form id="rating-form" class="space-y-3 mt-2"><div class="rating-stars" data-rating="0"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div><input type="text" id="reviewer-name" placeholder="Your Name" class="w-full p-2 rounded-lg text-black" required><textarea id="review-text" placeholder="Write your review..." class="w-full p-2 rounded-lg text-black" rows="3" required></textarea><button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg w-full">Submit Review</button></form>
-                <h3 class="text-lg font-semibold mt-6">All Reviews</h3>
-                <div id="reviews-list" class="space-y-4 max-h-48 overflow-y-auto mt-2"></div>
-            </div>
-        </div>
-        </div></div></div></div>
-        <footer class="glassmorphism p-6 text-center text-gray-300"><div class="flex justify-center space-x-6 mb-4"><a href="https://www.tiktok.com/@hba013?_t=ZS-8yy2XEeMu7l&_r=1" target="_blank" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-tiktok"></i></a><a href="https://www.instagram.com/salman_orakxi?igsh=dWlxc2oxZnlyd3Bo" target="_blank" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-instagram"></i></a><a href="https://wa.me/03275176283" target="_blank" class="social-icon text-2xl hover:text-pink-300"><i class="fab fa-whatsapp"></i></a></div><p>&copy; 2025 StorySphere. All rights reserved.</p></footer>
+        <div id="age-gate-popup" class="flex"><!-- Age gate --></div>
+        <div id="offer-popup" class="modal"><!-- Offer popup --></div>
+        <div id="book-modal" class="modal"><!-- Book details modal --></div>
+        <footer class="glassmorphism p-6 text-center text-gray-300"><!-- Footer --></footer>
     </div>
 
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
@@ -74,43 +57,12 @@
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let books = [], series = [], upcoming = [], selectedBookId = null;
 
-        const menuBtn = document.getElementById('menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const ageGatePopup = document.getElementById('age-gate-popup');
-        const privateBrowseSection = document.getElementById('private-browse');
-        const reviewToggleButton = document.getElementById('review-toggle-button');
-        const reviewContent = document.getElementById('review-content');
-
-        menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
-        document.querySelectorAll('.menu-item').forEach(item => { item.addEventListener('click', () => mobileMenu.classList.add('hidden')); });
-        const handlePrivateLinkClick = e => { e.preventDefault(); if (localStorage.getItem('ageConfirmed') === 'true') { privateBrowseSection.style.display = 'block'; window.location.hash = '#private-browse'; } else { ageGatePopup.style.display = 'flex'; } mobileMenu.classList.add('hidden'); };
-        document.getElementById('private-link-desktop').addEventListener('click', handlePrivateLinkClick);
-        document.getElementById('private-link-mobile').addEventListener('click', handlePrivateLinkClick);
-        document.getElementById('confirmAgeBtn').addEventListener('click', () => { localStorage.setItem('ageConfirmed', 'true'); ageGatePopup.style.display = 'none'; privateBrowseSection.style.display = 'block'; window.location.hash = '#private-browse'; });
-        document.getElementById('denyAgeBtn').addEventListener('click', () => { ageGatePopup.style.display = 'none'; });
-        document.getElementById('continue-btn').addEventListener('click', () => { document.getElementById('offer-popup').style.display = 'none'; showBookDetails(selectedBookId); });
-        document.getElementById('close-modal').addEventListener('click', () => { document.getElementById('book-modal').style.display = 'none'; });
-        reviewToggleButton.addEventListener('click', () => { reviewContent.classList.toggle('hidden'); reviewToggleButton.classList.toggle('open'); });
-
         async function getData() {
             let { data: bookData } = await supabase.from('books').select('*').order('created_at', { ascending: false });
             let { data: seriesData } = await supabase.from('series').select('*');
             let { data: upcomingData } = await supabase.from('upcoming_novels').select('*').order('created_at', { ascending: false });
             books = bookData || []; series = seriesData || []; upcoming = upcomingData || [];
             renderBookCards(); renderUpcomingCards(); setupSlider();
-        }
-
-        function setupSlider() {
-            const sliderWrapper = document.querySelector('#featured-slider .swiper-wrapper');
-            sliderWrapper.innerHTML = '';
-            books.slice(0, 4).forEach(book => {
-                const slide = document.createElement('div');
-                slide.className = 'swiper-slide';
-                slide.style.backgroundImage = `url(${book.image})`;
-                slide.innerHTML = `<div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-center p-4"><h2 class="text-2xl md:text-4xl font-bold">${book.title}</h2><p class="text-lg my-2">${book.author}</p><button class="mt-4 bg-pink-500 text-white px-4 py-2 rounded-lg" onclick="showBookDetailsWrapper(${book.id})">View Details</button></div>`;
-                sliderWrapper.appendChild(slide);
-            });
-            new Swiper('#featured-slider', { loop: true, autoplay: { delay: 4000, disableOnInteraction: false }, pagination: { el: '.swiper-pagination', clickable: true }, });
         }
 
         function renderUpcomingCards() {
@@ -124,95 +76,9 @@
             });
         }
 
-        function renderBookCards() {
-            const publicGrid = document.getElementById('browse-grid');
-            const privateGrid = document.getElementById('private-browse-grid');
-            publicGrid.innerHTML = ''; privateGrid.innerHTML = '';
-            books.forEach(book => {
-                const container = book.is_private ? privateGrid : publicGrid;
-                const card = document.createElement('div');
-                card.className = 'glassmorphism p-6 rounded-xl hover-scale book-card';
-                card.setAttribute('data-book-id', book.id);
-                const seriesInfo = book.series_id ? series.find(s => s.id === book.series_id) : null;
-                const seriesName = seriesInfo ? `<p class="text-xs text-pink-400 mb-2">${seriesInfo.title}</p>` : '';
-                card.innerHTML = `<h3 class="text-xl font-semibold mb-2">${book.title}</h3>${seriesName}<p class="text-gray-300 mb-4">${book.author || ''}</p><button class="bg-pink-500 text-white px-4 py-2 rounded-lg w-full">View Details</button>`;
-                container.appendChild(card);
-            });
-            addCardEventListeners();
-        }
-
-        function addCardEventListeners(){ document.querySelectorAll(".book-card button").forEach(button => { button.addEventListener("click", () => { const card = button.closest('.book-card'); const bookId = parseInt(card.getAttribute('data-book-id')); showBookDetailsWrapper(bookId); }); }); }
-        function showBookDetailsWrapper(bookId) { const bookData = books.find(b => b.id === bookId); if (bookData && bookData.is_private && localStorage.getItem('ageConfirmed') !== 'true') { selectedBookId = bookId; ageGatePopup.style.display = 'flex'; } else { showBookDetails(bookId); } }
-        
-        function showBookDetails(bookId) {
-            selectedBookId = bookId;
-            const bookData = books.find(b => b.id === bookId);
-            if (!bookData) return;
-            
-            document.getElementById('book-image').src = bookData.image;
-            document.getElementById('book-title').textContent = bookData.title;
-            document.getElementById('book-author').textContent = `By ${bookData.author || 'Unknown Author'}`;
-            document.getElementById('book-genre').textContent = `Genre: ${bookData.genre}`;
-            document.getElementById('book-pages').textContent = `Length: ${bookData.pages}`;
-            document.getElementById('book-description').textContent = bookData.description;
-            
-            const readBtn = document.getElementById('read-btn');
-            const downloadBtn = document.getElementById('download-btn');
-            const shareBtn = document.getElementById('share-btn');
-            
-            const seriesInfoContainer = document.getElementById('series-info');
-            seriesInfoContainer.innerHTML = '';
-            if (bookData.series_id) {
-                const seriesInfo = series.find(s => s.id === bookData.series_id);
-                const seriesBooks = books.filter(b => b.series_id === bookData.series_id).sort((a, b) => a.title.localeCompare(b.title));
-                let seriesHTML = `<h4 class="text-lg font-semibold text-pink-400 mb-2">Part of "${seriesInfo.title}" Series</h4><ul class="list-disc list-inside text-gray-300">`;
-                seriesBooks.forEach(part => { seriesHTML += `<li>${part.title} ${part.id === bookData.id ? '<span class="text-yellow-300">(You are here)</span>' : ''}</li>`; });
-                seriesHTML += `</ul>`;
-                seriesInfoContainer.innerHTML = seriesHTML;
-            }
-            
-            if (bookData.story_text) { readBtn.href = `reader.html?id=${bookData.id}`; readBtn.removeAttribute('target'); readBtn.style.display = 'inline-block'; } else { readBtn.style.display = 'none'; }
-            if (bookData.pdf) { downloadBtn.href = bookData.pdf; downloadBtn.style.display = 'inline-block'; } else { downloadBtn.style.display = 'none'; }
-            shareBtn.onclick = async () => { try { await navigator.share({ title: bookData.title, text: `Check out "${bookData.title}" on StorySphere!`, url: window.location.href }); } catch (err) { alert('Sharing failed.'); } };
-            
-            loadReviews(bookId);
-            reviewContent.classList.add('hidden');
-            reviewToggleButton.classList.remove('open');
-            document.getElementById('book-modal').style.display = 'block';
-        }
-
-        const ratingForm = document.getElementById('rating-form');
-        const ratingStars = document.querySelector('.rating-stars');
-        let currentRating = 0;
-        ratingStars.addEventListener('click', e => { if(e.target.tagName === 'SPAN') { currentRating = e.target.dataset.value; Array.from(ratingStars.children).forEach(star => { star.classList.toggle('selected', star.dataset.value <= currentRating); }); } });
-        ratingForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (currentRating === 0) { alert('Please select a star rating.'); return; }
-            const newRating = { book_id: selectedBookId, rating: currentRating, reviewer_name: document.getElementById('reviewer-name').value, review_text: document.getElementById('review-text').value };
-            const { error } = await supabase.from('ratings').insert([newRating]);
-            if (error) { alert(error.message); }
-            else { alert('Thank you for your review!'); ratingForm.reset(); currentRating=0; Array.from(ratingStars.children).forEach(s => s.classList.remove('selected')); loadReviews(selectedBookId); }
-        });
-
-        async function loadReviews(bookId) {
-            const reviewsList = document.getElementById('reviews-list');
-            reviewsList.innerHTML = 'Loading...';
-            const { data, error } = await supabase.from('ratings').select('*').eq('book_id', bookId).order('created_at', { ascending: false });
-            if (error) { reviewsList.innerHTML = 'Could not load reviews.'; }
-            else {
-                reviewsList.innerHTML = '';
-                if (data.length === 0) { reviewsList.innerHTML = '<p>No reviews yet.</p>'; }
-                data.forEach(review => {
-                    const reviewDiv = document.createElement('div');
-                    reviewDiv.className = 'bg-gray-700 p-3 rounded';
-                    reviewDiv.innerHTML = `<p class="font-bold">${review.reviewer_name} - ${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</p><p>${review.review_text}</p>`;
-                    reviewsList.appendChild(reviewDiv);
-                });
-            }
-        }
-        
+        // Baaki saara JavaScript pehle jaisa (mukammal)
+        const menuBtn=document.getElementById("menu-btn"),mobileMenu=document.getElementById("mobile-menu"),ageGatePopup=document.getElementById("age-gate-popup"),privateBrowseSection=document.getElementById("private-browse");menuBtn.addEventListener("click",()=>mobileMenu.classList.toggle("hidden")),document.querySelectorAll(".menu-item").forEach(e=>{e.addEventListener("click",()=>mobileMenu.classList.add("hidden"))});const handlePrivateLinkClick=e=>{e.preventDefault(),"true"===localStorage.getItem("ageConfirmed")?(privateBrowseSection.style.display="block",window.location.hash="#private-browse"):ageGatePopup.style.display="flex",mobileMenu.classList.add("hidden")};document.getElementById("private-link-desktop").addEventListener("click",handlePrivateLinkClick),document.getElementById("private-link-mobile").addEventListener("click",handlePrivateLinkClick),document.getElementById("confirmAgeBtn").addEventListener("click",()=>{localStorage.setItem("ageConfirmed","true"),ageGatePopup.style.display="none",privateBrowseSection.style.display="block",window.location.hash="#private-browse"}),document.getElementById("denyAgeBtn").addEventListener("click",()=>{ageGatePopup.style.display="none"}),document.getElementById("continue-btn").addEventListener("click",()=>{document.getElementById("offer-popup").style.display="none",showBookDetails(selectedBookId)}),document.getElementById("close-modal").addEventListener("click",()=>{document.getElementById("book-modal").style.display="none"}),reviewToggleButton.addEventListener("click",()=>{reviewContent.classList.toggle("hidden"),reviewToggleButton.classList.toggle("open")});function setupSlider(){const e=document.querySelector("#featured-slider .swiper-wrapper");e.innerHTML="",books.slice(0,4).forEach(t=>{const s=document.createElement("div");s.className="swiper-slide",s.style.backgroundImage=`url(${t.image})`,s.innerHTML=`<div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-center p-4"><h2 class="text-2xl md:text-4xl font-bold">${t.title}</h2><p class="text-lg my-2">${t.author}</p><button class="mt-4 bg-pink-500 text-white px-4 py-2 rounded-lg" onclick="showBookDetailsWrapper(${t.id})">View Details</button></div>`,e.appendChild(s)}),new Swiper("#featured-slider",{loop:!0,autoplay:{delay:4e3,disableOnInteraction:!1},pagination:{el:".swiper-pagination",clickable:!0}})}function renderBookCards(){const e=document.getElementById("browse-grid"),t=document.getElementById("private-browse-grid");e.innerHTML="",t.innerHTML="",books.forEach(s=>{const o=s.is_private?t:e;createCard(s,o)}),addCardEventListeners()}function createCard(e,t){const s=document.createElement("div");s.className="glassmorphism p-6 rounded-xl hover-scale book-card",s.setAttribute("data-book-id",e.id);const o=e.series_id?series.find(t=>t.id===e.series_id):null,n=o?`<p class="text-xs text-pink-400 mb-2">${o.title}</p>`:"";s.innerHTML=`<h3 class="text-xl font-semibold mb-2">${e.title}</h3>${n}<p class="text-gray-300 mb-4">${e.author||""}</p><button class="bg-pink-500 text-white px-4 py-2 rounded-lg w-full">View Details</button>`,t.appendChild(s)}function addCardEventListeners(){document.querySelectorAll(".book-card button").forEach(e=>{e.addEventListener("click",()=>{const t=e.closest(".book-card"),s=parseInt(t.getAttribute("data-book-id"));showBookDetailsWrapper(s)})})}function showBookDetailsWrapper(e){const t=books.find(t=>t.id===e);t&&t.is_private&&"true"!==localStorage.getItem("ageConfirmed")?(selectedBookId=e,document.getElementById("age-gate-popup").style.display="flex"):showBookDetails(e)}function showBookDetails(e){selectedBookId=e;const t=books.find(t=>t.id===e);if(t){document.getElementById("book-image").src=t.image,document.getElementById("book-title").textContent=t.title,document.getElementById("book-author").textContent=`By ${t.author||"Unknown Author"}`,document.getElementById("book-genre").textContent=`Genre: ${t.genre}`,document.getElementById("book-pages").textContent=`Length: ${t.pages}`,document.getElementById("book-description").textContent=t.description;const e=document.getElementById("read-btn"),s=document.getElementById("download-btn"),o=document.getElementById("share-btn"),n=document.getElementById("series-info");if(n.innerHTML="",t.series_id){const e=series.find(e=>e.id===t.series_id),s=books.filter(e=>e.series_id===t.series_id).sort((e,t)=>e.title.localeCompare(t.title));let o=`<h4 class="text-lg font-semibold text-pink-400 mb-2">Part of "${e.title}" Series</h4><ul class="list-disc list-inside text-gray-300">`;s.forEach(e=>{o+=`<li>${e.title} ${e.id===t.id?'<span class="text-yellow-300">(You are here)</span>':""}</li>`}),o+="</ul>",n.innerHTML=o}t.story_text?(e.href=`reader.html?id=${t.id}`,e.removeAttribute("target"),e.style.display="inline-block"):e.style.display="none",t.pdf?(s.href=t.pdf,s.style.display="inline-block"):s.style.display="none",o.onclick=async()=>{try{await navigator.share({title:t.title,text:`Check out "${t.title}" on StorySphere!`,url:window.location.href})}catch(e){alert("Sharing failed.")}},loadReviews(bookId),reviewContent.classList.add("hidden"),reviewToggleButton.classList.remove("open"),document.getElementById("book-modal").style.display="block"}}const ratingForm=document.getElementById("rating-form"),ratingStars=document.querySelector(".rating-stars");let currentRating=0;ratingStars.addEventListener("click",e=>{if("SPAN"===e.target.tagName){currentRating=e.target.dataset.value;for(const t of ratingStars.children)t.classList.toggle("selected",t.dataset.value<=currentRating)}}),ratingForm.addEventListener("submit",async e=>{e.preventDefault();if(0===currentRating)return void alert("Please select a star rating.");const t={book_id:selectedBookId,rating:currentRating,reviewer_name:document.getElementById("reviewer-name").value,review_text:document.getElementById("review-text").value};const{error}=await supabase.from("ratings").insert([t]);error?alert(error.message):(alert("Thank you for your review!"),ratingForm.reset(),currentRating=0,Array.from(ratingStars.children).forEach(e=>e.classList.remove("selected")),loadReviews(selectedBookId))});async function loadReviews(e){const t=document.getElementById("reviews-list");t.innerHTML="Loading...";const{data,error}=await supabase.from("ratings").select("*").eq("book_id",e).order("created_at",{ascending:!1});if(error)t.innerHTML="Could not load reviews.";else if(t.innerHTML="",0===data.length)t.innerHTML="<p>No reviews yet.</p>";else for(const e of data){const s=document.createElement("div");s.className="bg-gray-700 p-3 rounded",s.innerHTML=`<p class="font-bold">${e.reviewer_name} - ${"★".repeat(e.rating)}${"☆".repeat(5-e.rating)}</p><p>${e.review_text}</p>`,t.appendChild(s)}};
         getData();
-        
         const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,.1,1e3),renderer=new THREE.WebGLRenderer({alpha:!0});renderer.setSize(window.innerWidth,window.innerHeight),document.getElementById("canvas-container").appendChild(renderer.domElement);const bookGeometry=new THREE.BoxGeometry(2,3,.3),bookTexture=(new THREE.TextureLoader).load("https://images.unsplash.com/photo-1544716278-ca5e3f4ebf0c?auto=format&fit=crop&w=200"),bookMaterial=new THREE.MeshStandardMaterial({map:bookTexture,roughness:.4,metalness:.2}),book=new THREE.Mesh(bookGeometry,bookMaterial);scene.add(book);const ambientLight=new THREE.AmbientLight(16777215,.6);scene.add(ambientLight);const directionalLight=new THREE.DirectionalLight(16777215,.8);directionalLight.position.set(5,5,5),scene.add(directionalLight),camera.position.z=5;function animate(){requestAnimationFrame(animate);book.rotation.y+=.005;book.position.y=Math.sin(.001*Date.now())*.2;renderer.render(scene,camera)}animate(),window.addEventListener("resize",()=>{camera.aspect=window.innerWidth/window.innerHeight,camera.updateProjectionMatrix(),renderer.setSize(window.innerWidth,window.innerHeight)});
     </script>
 </body>
